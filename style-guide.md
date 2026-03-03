@@ -1103,12 +1103,29 @@ assert(buffer_size > 0 && "buffer_size must be positive in upload path");
 - Use 2-space indentation inside command argument blocks.
 - Keep long lists (`set(...)`, `add_executable(...)`, warning flags) one item per line.
 - Use lowercase CMake command names consistently.
+- Keep CMake keywords/specifiers uppercase (`VERSION`, `PRIVATE`, `CACHE`, `STRING`, `STATUS`, `FATAL_ERROR`, `STREQUAL`, `ON`, `OFF`).
+- Keep no space between command name and `(` (`target_link_libraries(...)`, not `target_link_libraries (...)`).
+- For multi-line calls, place the closing `)` on its own line.
 
 ### 20.2 Condition and build-type block style
 
 - Normalise build type with `string(TOLOWER ...)` and branch on explicit values.
 - Keep one responsibility per conditional block (build mode, exception mode, feature toggles).
 - Emit clear `message(STATUS ...)` lines for selected mode.
+- Prefer uppercase for cache/global CMake variables and lowercase snake_case for local helper variables.
+
+Example:
+
+```cmake
+set(EXCEPTION_HANDLING wasm CACHE STRING "Exception handling mode")
+string(TOLOWER "${CMAKE_BUILD_TYPE}" build_type)
+
+if(build_type STREQUAL "debug")
+  message(STATUS "debug build")
+else()
+  message(FATAL_ERROR "invalid build type: ${CMAKE_BUILD_TYPE}")
+endif()
+```
 
 ### 20.3 Target declarations and grouping
 
@@ -1119,6 +1136,7 @@ assert(buffer_size > 0 && "buffer_size must be positive in upload path");
 - Keep `target_link_libraries`, `target_compile_options`, and `target_link_options` in separate clear blocks.
 - Do not use source globbing for build targets; list files explicitly.
 - In multi-line `target_link_libraries(...)`, keep visibility and library on the same line (`PRIVATE libname`).
+- Keep target-related blocks adjacent and separated by a single blank line for scanability.
 
 Example:
 
