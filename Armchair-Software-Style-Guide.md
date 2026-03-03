@@ -408,7 +408,7 @@ Example:
 switch(mode) {
 case mode_type::a:
   {
-    int value{1};
+    int const value{1};
   }
   break;
 case mode_type::b:
@@ -710,9 +710,9 @@ Rule (confirmed by owner preference):
 Example:
 
 ```cpp
-int retries{3};
-std::string name{"anchorhold"};
-std::chrono::seconds timeout{5s};
+int constexpr retries{3};
+std::string const name{"anchorhold"};
+std::chrono::seconds constexpr timeout{5s};
 ```
 
 ### 11.2 Assignment vs initialization distinctions
@@ -1187,9 +1187,11 @@ auto parse_args(int argc, char const *argv[])->bool {
 Rule:
 
 - Prefer same-line comments where appropriate.
-- Align inline comments to start at column 80 when practical.
+- Align inline comments to start at or beyond column 80.
 - If code already extends beyond column 80, place comment after one space rather than forcing a wrap.
 - When documenting scope intent, place the comment on the opening brace line, not the closing brace line.
+- Exception: closing-namespace comments (`} // namespace ...`) stay visually coupled to the closing brace.
+- Exception: preprocessor closing comments (`#endif // ...`) stay visually coupled to the directive.
 - In function bodies and inline code comments, start comments lowercase unless grammar/acronyms require otherwise.
 - For one-line comments, avoid trailing punctuation to reduce visual noise.
 - `///` documentary comments should start with capitalized text.
