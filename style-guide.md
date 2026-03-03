@@ -1268,3 +1268,25 @@ target_link_libraries(example_tool
   - `#pragma once` enforcement in first-party headers
   - C-style cast detection
   - forbidden `using namespace` (except allowed literal namespaces in source files)
+
+### 23.1 Tools and automation
+
+- This style-guide repository provides configuration files that can be copied into project repositories to enforce core formatting and repository-hygiene rules automatically.
+- These configs define baseline behavior shared across Armchair projects and reduce per-project setup drift.
+
+### 23.2 `.editorconfig`
+
+- Used by: editors and IDEs with EditorConfig support (native or plugin-based).
+- Enforces: indentation style/width, UTF-8 encoding, final newline, trailing-whitespace handling, plus file-type-specific overrides.
+- How to use:
+  - copy `.editorconfig` to the project root
+  - ensure contributors have EditorConfig enabled in their editor
+  - allow more-specific project overrides only when intentionally required
+
+### 23.3 `.gitattributes`
+
+- Used by: Git itself (working tree/commit normalization behavior).
+- Enforces: repository text normalization defaults (`* text=auto`) so text content is committed consistently while checkout style follows contributor Git settings.
+- How to use:
+  - copy `.gitattributes` to the project root
+  - keep project-specific exceptions in the same file only when required by that project's asset/toolchain needs

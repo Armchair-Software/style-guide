@@ -1,0 +1,3 @@
+# Normalize text files in the repository while allowing platform-local checkout
+# style according to each contributor's Git settings (for example core.autocrlf).
+* text=auto
