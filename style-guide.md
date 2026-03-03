@@ -1104,6 +1104,8 @@ assert(buffer_size > 0 && "buffer_size must be positive in upload path");
 - Keep long lists (`set(...)`, `add_executable(...)`, warning flags) one item per line.
 - Use lowercase CMake command names consistently.
 - Keep CMake keywords/specifiers uppercase (`VERSION`, `PRIVATE`, `CACHE`, `STRING`, `STATUS`, `FATAL_ERROR`, `STREQUAL`, `ON`, `OFF`).
+- Standardise boolean literals to `ON`/`OFF` for project CMake code.
+- Avoid mixed boolean spellings (`True`/`False`, `YES`/`NO`, `1`/`0`) unless an external interface explicitly requires them.
 - Keep no space between command name and `(` (`target_link_libraries(...)`, not `target_link_libraries (...)`).
 - For multi-line calls, place the closing `)` on its own line.
 
@@ -1117,6 +1119,7 @@ assert(buffer_size > 0 && "buffer_size must be positive in upload path");
 Example:
 
 ```cmake
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(EXCEPTION_HANDLING wasm CACHE STRING "Exception handling mode")
 string(TOLOWER "${CMAKE_BUILD_TYPE}" build_type)
 
