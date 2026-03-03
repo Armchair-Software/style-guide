@@ -973,60 +973,21 @@ assert(buffer_size > 0 && "buffer_size must be positive in upload path");
 - Avoid ambiguous error text that omits operation context.
 - Make error messages unique where practical so origin can be searched directly in code.
 
-## 20. Concurrency and Threading Style
+## 20. CMakeLists.txt Style (Brief)
 
-### 20.1 Thread lifecycle conventions
-
-- Make thread ownership and shutdown paths explicit.
-- Prefer RAII thread management (`std::jthread` where practical).
-- Ensure join/stop behavior is deterministic.
-
-### 20.2 Synchronization primitive usage
-
-- Keep lock scope minimal.
-- Use `std::mutex`/`std::condition_variable` patterns consistently and document shared-state expectations.
-- For simple synchronized shared values, `boost::synchronized_value` is preferred where available for RAII-friendly access patterns.
-
-### 20.3 Atomic usage and memory-order style
-
-- Use atomics for simple shared flags/counters.
-- Prefer the weakest memory ordering that is correct for the use case.
-- `std::memory_order::relaxed` is common for simple counters/flags when no ordering relationship is required.
-- Stronger orderings should be used only when a clear cross-thread ordering requirement exists.
-- Remember that operations without an explicit memory order default to the strictest ordering (`seq_cst`).
-
-### 20.4 Queue/event loop patterns
-
-- Use clear producer/consumer queue semantics.
-- Keep event loops readable and explicit about stop conditions.
-
-Example:
-
-```cpp
-while(keep_running) {
-  if(!queue.pop(item)) {
-    std::this_thread::sleep_for(1ms);
-    continue;
-  }
-  handle(item);
-}
-```
-
-## 21. CMakeLists.txt Style (Brief)
-
-### 21.1 Indentation and list formatting
+### 20.1 Indentation and list formatting
 
 - Use 2-space indentation inside command argument blocks.
 - Keep long lists (`set(...)`, `add_executable(...)`, warning flags) one item per line.
 - Use uppercase command names consistently.
 
-### 21.2 Condition and build-type block style
+### 20.2 Condition and build-type block style
 
 - Normalize build type with `string(TOLOWER ...)` and branch on explicit values.
 - Keep one responsibility per conditional block (build mode, exception mode, feature toggles).
 - Emit clear `message(STATUS ...)` lines for selected mode.
 
-### 21.3 Target declarations and grouping
+### 20.3 Target declarations and grouping
 
 - Group sources by role using comments:
   - project-specific
@@ -1035,67 +996,67 @@ while(keep_running) {
 - Keep `target_link_libraries`, `target_compile_options`, and `target_link_options` in separate clear blocks.
 - Do not use source globbing for build targets; list files explicitly.
 
-### 21.4 Compile/link options layout
+### 20.4 Compile/link options layout
 
 - Keep compile/link options in named variables when reused.
 - Keep warnings and optimization flags grouped with comment headers for readability.
 
-## 22. Bash Script Style (Brief)
+## 21. Bash Script Style (Brief)
 
-### 22.1 Shebang and safety defaults
+### 21.1 Shebang and safety defaults
 
 - Use `#!/bin/bash`.
 - Prefer explicit failure checks (`|| exit 1`) for critical commands.
 - For user-facing build scripts, preserve existing explicit flow over implicit shell options.
 
-### 22.2 Variable naming and quoting
+### 21.2 Variable naming and quoting
 
 - Use lowercase snake_case for script variables (`build_dir`, `compiled_resources_total`).
 - Quote variable expansions unless intentional word-splitting is required.
 
-### 22.3 Conditionals, loops, and spacing
+### 21.3 Conditionals, loops, and spacing
 
 - Use `[ ... ]` condition style consistently with spaces around brackets.
 - Use straightforward `for` loops over arrays for file batches.
 - Keep condition bodies compact and readable.
 
-### 22.4 Command failure handling
+### 21.4 Command failure handling
 
 - Use `|| exit 1` on build-critical commands (`cmake`, `make`, resource compilation).
 - Check presence of optional tools before use (`which ccache`, `which naga`).
 
-### 22.5 Logging output conventions
+### 21.5 Logging output conventions
 
 - Use short, explicit `echo` status messages.
 - Preserve the current convention of redirecting stdout to stderr for script status logs where used (`exec 1>&2`).
 
-## 23. Revision Control
+## 22. Revision Control
 
-### 23.1 Line endings
+### 22.1 Line endings
 
 - Commit text files with Unix line endings (`LF`) only.
 - Configure Git to avoid unintended CRLF churn:
   - on Unix-like systems, prefer `git config --global core.autocrlf input`
 - Repository-level attributes should enforce LF where practical.
 
-### 23.2 Committed file permissions
+### 22.2 Committed file permissions
 
 - Non-executable committed files should use mode `664`.
 - Executable files (scripts/tools intended to run directly) should use mode `775`.
 - Do not set executable bits on non-executable source/data files.
 
-### 23.3 Commit structure
+### 22.3 Commit structure
 
 - Commits should be frequent and atomic (ideally one feature or one tightly scoped change per commit).
 - Avoid bundling unrelated changes in a single commit.
 
-### 23.4 Commit message style
+### 22.4 Commit message style
 
 - Keep subject lines clear, brief, and specific.
 - Commit messages should describe what changed, not how or why.
 - No commit-signing requirement is imposed by this style guide.
 
-## 24. Enforcement
+## 23. Enforcement
 
 - Human review enforces full adherence to this style guide.
 - Any unresolved divergence from guide rules is a valid reason to reject the change.
@@ -1106,7 +1067,7 @@ while(keep_running) {
   - C-style cast detection
   - forbidden `using namespace` (except allowed literal namespaces in source files)
 
-## 25. Baseline Example
+## 24. Baseline Example
 
 ```cpp
 namespace example {
