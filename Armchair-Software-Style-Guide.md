@@ -583,6 +583,9 @@ result = item{
 - For bitmasks and protocol/register bit patterns, prefer binary literals with separators for legibility.
 - Group binary digits on meaningful boundaries (field/byte); if no natural boundary exists, group in nibbles.
 - Use unsigned suffixes on integer bitmask literals to avoid unintended signed behaviour (`0b...u`, `0x...u`).
+- Prefer raw string literals (`R"(...)`) when they materially reduce escaping noise (for example regexes and embedded snippets).
+- In source files, prefer string-view literals (`"..."sv`) for non-owning compile-time string references.
+- For packed hex constants, use digit separators on byte boundaries (`0xFF'00'AA'55u`).
 
 Example:
 
@@ -590,6 +593,10 @@ Example:
 auto constexpr packet_mask{0b1000'0000'1010'0101u};
 auto constexpr flags_mask{0b0011'1100u};
 auto constexpr high_nibble{0b1111'0000u};
+auto constexpr rgba_mask{0xFF'00'AA'55u};
+auto const pattern{R"(^[A-Z]{3}\d{2}$)"};
+using namespace std::string_view_literals;
+auto constexpr status_text{"ready"sv};
 ```
 
 ### 11.5 Cast policy (`static_cast`, C-style cast restrictions)
