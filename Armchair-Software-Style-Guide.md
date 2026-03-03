@@ -343,6 +343,17 @@ Draft rule:
   - `if(!ready) return;`
 - Single-line bodies are also acceptable for simple assignment/function-call bodies when readability stays high.
 - Use braces once a branch has multiple statements.
+- If the body appears on a new line, braces are mandatory (no newline-separated unbraced bodies).
+
+Example:
+
+```cpp
+if(ready) run_once();                                                           // allowed
+
+if(ready) {
+  run_once();
+}                                                                               // required when body is on next line
+```
 
 ### 7.7 What does not get indented
 
@@ -517,9 +528,9 @@ Draft rule:
 
 Draft rule:
 
-- Trailing return style is allowed.
+- Trailing return style is allowed but not preferred by default.
 - It is encouraged for entry points and callback-heavy signatures.
-- Do not use trailing return style when it makes a declaration more verbose than a direct return type.
+- Prefer direct return type syntax when it is shorter and clearer.
 
 ### 10.3 Reference and const placement style
 
@@ -716,20 +727,127 @@ Rule:
 ## 13. Functions and APIs
 
 ### 13.1 Function size and responsibility
+
+Rule:
+
+- Prefer single-purpose functions with clear intent.
+- Split large functions into logical helper functions or scoped sections.
+
+Example:
+
+```cpp
+void process() {
+  /// Validate input and fast-fail
+  if(!ready) return;
+
+  {
+    /// Local scope for temporary setup data
+    setup_context ctx{build_context()};
+    apply_setup(ctx);
+  }
+
+  /// Main work phase
+  run_core_logic();
+}
+```
+
 ### 13.2 Parameter passing conventions
+
+Rule:
+
+- Pass cheap scalar types by value.
+- Pass heavy objects as `type const &` for read-only access.
+- Pass by non-const reference only for intentional mutation.
+
 ### 13.3 Output parameters and return values
+
+Rule:
+
+- Prefer return values over output parameters when possible.
+- Use aggregates/structs for multi-value returns.
+- Use output parameters only when they materially improve API clarity or performance.
+
 ### 13.4 Overload design rules
+
+Rule:
+
+- Keep overload sets small and unambiguous.
+- Prefer explicit naming differences over confusing overload combinations.
+
 ### 13.5 `[[nodiscard]]` usage
+
+Rule:
+
+- Use `[[nodiscard]]` on results that callers should not ignore (status, queried state, computed value objects).
+
 ### 13.6 `noexcept` guidance
+
+Rule:
+
+- Mark functions `noexcept` when non-throwing behavior is guaranteed and useful to consumers/optimizers.
+- Do not mark `noexcept` speculatively.
+
+### 13.7 Standard vs C library symbol usage
+
+Rule:
+
+- Prefer C++ standard-library function symbols with `std::` qualification (for example `std::abs` rather than `abs`).
+- Do not force `std::` qualification for type names where house style prefers unqualified forms (for example use `size_t`, not `std::size_t`, unless scope requires disambiguation).
+
+Example:
+
+```cpp
+size_t const count{values.size()};
+double const magnitude{std::abs(delta)};
+```
 
 ## 14. Classes, Structs, and OOP
 
 ### 14.1 `struct` vs `class` usage
+
+Rule:
+
+- Use `struct` for passive data aggregates and simple transport/state objects.
+- Use `class` when enforcing invariants/encapsulation and behavior-rich APIs.
+
 ### 14.2 Access section ordering
+
+Rule:
+
+- Keep access sections explicit and ordered consistently.
+- Access labels are not indented inside class definitions.
+- Follow the member ordering rules defined in section 10.4.
+
 ### 14.3 Constructor and destructor conventions
+
+Rule:
+
+- Prefer in-class member defaults plus constructor initialization lists.
+- Use `explicit` on single-argument constructors unless implicit conversion is intentionally desired.
+- Keep constructors focused on establishing valid object state.
+
 ### 14.4 Rule of 0/3/5 defaults
+
+Rule:
+
+- Prefer Rule of 0 where possible.
+- If custom ownership/resource behavior exists, define the appropriate special member set explicitly and consistently.
+
 ### 14.5 Inheritance formatting
+
+Rule:
+
+- Keep inheritance declarations compact and readable:
+  - `class child : public base { ... };`
+- Prefer composition over inheritance when inheritance does not clearly model an is-a relationship.
+
 ### 14.6 Virtual and override conventions
+
+Rule:
+
+- Use `override` on overridden virtual functions.
+- Use `final` where extension is intentionally blocked.
+- Polymorphic base classes should provide a virtual destructor.
 
 ## 15. Templates and Generic Code
 
@@ -783,11 +901,12 @@ Rule:
 
 - Follow normal function formatting for lambda parameters and return type annotations.
 - Omit empty `()` for parameterless lambdas (modern C++ style).
+- Do not place a space between lambda introducer and opening brace for parameterless lambdas (`[]{`).
 
 Example:
 
 ```cpp
-auto tick{[] {
+auto tick{[]{
   return true;
 }};
 ```
@@ -878,7 +997,24 @@ Rule:
 
 Rule:
 
-- Use `///` for concise API intent and behavioral notes in headers and key implementation points.
+- Use `///` for concise API intent and behavioral notes.
+- Function bodies should typically begin with a `///` documentary comment describing intent/behavior.
+- `///` comments at class declarations are encouraged to describe class purpose.
+- Full doxygen-style comments are allowed.
+- Doxygen parameter/return annotations are optional, but if used they must be correct and doxygen-compatible.
+
+Example:
+
+```cpp
+/// Render the components of the world GUI
+void world_gui::draw(game_state &state);
+
+/// Parse command line options.
+/// @param argc Number of arguments.
+/// @param argv Argument values.
+/// @return true if launch should continue.
+bool parse_args(int argc, char const *argv[]);
+```
 
 ### 18.3 Inline rationale comments
 
@@ -909,16 +1045,87 @@ Rule:
 ## 19. Error Handling and Diagnostics
 
 ### 19.1 Exception use and catch formatting
+
+Rule:
+
+- Catch formatting uses attached control parentheses (`catch(...)`).
+- Catch by `const &` for exception types unless mutation is required.
+- Keep catch handlers focused: log context, clean up, and return/propagate.
+
+Example:
+
+```cpp
+try {
+  run();
+} catch(std::exception const &e) {
+  logger << "ERROR: run failed: " << e.what();
+  return false;
+}
+```
+
 ### 19.2 Error logging style
+
+Rule:
+
+- Log failures with actionable context (operation, key identifiers, error text).
+- Prefer consistent severity prefixes (`ERROR`, `WARNING`, `DEBUG`) matching project conventions.
+
 ### 19.3 Assertions and defensive checks
+
+Rule:
+
+- Use assertions for invariants and programmer errors.
+- Use runtime checks for recoverable invalid input/state.
+
 ### 19.4 Failure message quality and consistency
+
+Rule:
+
+- Keep messages specific and concise.
+- Avoid ambiguous error text that omits operation context.
 
 ## 20. Concurrency and Threading Style
 
 ### 20.1 Thread lifecycle conventions
+
+Rule:
+
+- Make thread ownership and shutdown paths explicit.
+- Prefer RAII thread management (`std::jthread` where practical).
+- Ensure join/stop behavior is deterministic.
+
 ### 20.2 Synchronization primitive usage
+
+Rule:
+
+- Keep lock scope minimal.
+- Use `std::mutex`/`std::condition_variable` patterns consistently and document shared-state expectations.
+
 ### 20.3 Atomic usage and memory-order style
+
+Rule:
+
+- Use atomics for simple shared flags/counters.
+- Default to strong ordering unless a weaker order is deliberately chosen and documented.
+
 ### 20.4 Queue/event loop patterns
+
+Rule:
+
+- Use clear producer/consumer queue semantics.
+- Keep event loops readable and explicit about stop conditions.
+
+Example:
+
+```cpp
+while(keep_running) {
+  if(!queue.pop(item)) {
+    std::this_thread::sleep_for(1ms);
+    continue;
+  }
+  handle(item);
+}
+```
 
 ## 21. CMakeLists.txt Style (Brief)
 
