@@ -53,26 +53,127 @@ Rule:
 ## 2. Style Guide Method
 
 ### 2.1 Evidence sources and audit manifest
+
+Rule:
+
+- Style rules are derived from first-party code only.
+- The authoritative audit inventory is:
+  - `/home/slowriot/code/style-guide/evidence/first_party_cpp_manifest.txt`
+
 ### 2.2 Rule format per section
+
+Rule:
+
+- Each section should include:
+  - explicit rule text
+  - short rationale when non-obvious
+  - one concrete formatting example when useful
+
 ### 2.3 Handling ambiguity and contradictory examples
+
+Rule:
+
+- Historical inconsistency is treated as debt, not precedent.
+- When examples conflict, the explicitly stated house rule wins.
+- Contradictions discovered later should be resolved by updating this guide, then normalizing code.
+
 ### 2.4 Enforcement strategy (manual review / tooling / linting)
+
+Rule:
+
+- Mechanical style is enforced by tooling where possible.
+- Human review focuses on intent, readability, and correctness.
+- Manual review should not reject code for purely mechanical issues already covered by automation.
 
 ## 3. File and Project Structure
 
 ### 3.1 Project root layout conventions
+
+Rule:
+
+- Keep source grouped by subsystem/domain (`render`, `gui`, `world`, `net`, etc.).
+- Keep shared internal libraries in clearly named module directories (`vectorstorm`, `logstorm`, `timestorm`, etc.).
+
 ### 3.2 Directory naming conventions
+
+Rule:
+
+- Use lowercase snake_case directory names.
+- Directory names should reflect subsystem function, not implementation detail.
+
 ### 3.3 Module boundaries and folder ownership
+
+Rule:
+
+- Prefer internal includes through module boundaries rather than deep cross-folder coupling.
+- Shared utilities belong in dedicated shared modules, not duplicated local helpers.
+
 ### 3.4 Header/source pairing and location
+
+Rule:
+
+- Keep `.h` and `.cpp` paired in the same module directory when practical.
+- A `.cpp` should generally correspond to a same-name header unless it is an entry point or intentionally translation-unit-local implementation.
+
 ### 3.5 Public vs private headers
+
+Rule:
+
+- Headers intended for broad reuse should expose stable API surface and minimize transitive includes.
+- Private implementation details should remain in `.cpp` files or tightly scoped internal headers.
+
 ### 3.6 Test/source placement conventions
+
+Rule:
+
+- Test files belong in dedicated test paths and are excluded from style authority unless explicitly in scope for house style extraction.
+
 ### 3.7 Asset and non-code file placement
+
+Rule:
+
+- Non-code resources should be isolated under dedicated resource/asset directories and not mixed with first-party C++ source layout.
 
 ## 4. File Naming Conventions
 
 ### 4.1 `.cpp` and `.h` filename casing
+
+Rule:
+
+- Use lowercase snake_case filenames.
+- File names should reflect primary contained type or responsibility.
+
+Example:
+
+```text
+world_manager.cpp
+world_manager.h
+```
+
 ### 4.2 Acronyms in names
+
+Rule:
+
+- Acronyms should remain lowercase within snake_case names (`webgpu_renderer`, `api_client`).
+- Avoid mixed-case acronym styling in filenames.
+
 ### 4.3 Prefixes/suffixes (`_manager`, `_renderer`, `_types`, `_forward`)
+
+Rule:
+
+- Suffixes should encode role clearly when useful:
+  - `_manager` for orchestration/stateful coordinators
+  - `_renderer` for rendering subsystems
+  - `_types` for alias/type bundles
+  - `_forward` for forward-declaration headers
+
 ### 4.4 Special filenames (`main.cpp`, `version.h`, `protocol.h`)
+
+Rule:
+
+- `main.cpp` is reserved for entry points.
+- `version.h` and similar generated metadata files may be mechanically produced, but should be normalized toward guide style where feasible.
+- Shared protocol/interface files should use stable, predictable naming (`protocol.h`) and live near owning module roots.
 
 ## 5. File Prologue and Includes
 
@@ -350,9 +451,9 @@ Example:
 ```cpp
 if(ready) run_once();                                                           // allowed
 
-if(ready) {
+if(ready) {                                                                     // required when body is on next line
   run_once();
-}                                                                               // required when body is on next line
+}
 ```
 
 ### 7.7 What does not get indented
@@ -730,24 +831,29 @@ Rule:
 
 Rule:
 
-- Prefer single-purpose functions with clear intent.
-- Split large functions into logical helper functions or scoped sections.
+- Function structure should optimize for performance and optimizer visibility first.
+- When readability and performance trade off, performance takes priority.
+- Large functions are acceptable when they represent a coherent flow and avoid needless call/forwarding overhead.
+- If logic is called from only one place, keep it inline at that call site unless extraction provides clear structural value (for example shared class-member access, reusable behavior, or isolation of unavoidable complexity).
+- Prefer liberal documentary comments over artificial fragmentation into mini-functions.
 
 Example:
 
 ```cpp
 void process() {
-  /// Validate input and fast-fail
+  /// Validate input and fast-fail.
   if(!ready) return;
 
   {
-    /// Local scope for temporary setup data
-    setup_context ctx{build_context()};
-    apply_setup(ctx);
+    /// Setup phase.
+    setup_context const ctx{build_context()};
+    state.setup(ctx);
   }
 
-  /// Main work phase
-  run_core_logic();
+  /// Main work phase kept inline for traceability and optimization.
+  for(size_t i{0}; i != items.size(); ++i) {
+    state.update(items[i]);
+  }
 }
 ```
 
@@ -758,6 +864,27 @@ Rule:
 - Pass cheap scalar types by value.
 - Pass heavy objects as `type const &` for read-only access.
 - Pass by non-const reference only for intentional mutation.
+- Use forwarding references (`T&&`) and perfect forwarding for generic pass-through APIs where preserving value category is required.
+- For by-value parameters:
+  - declarations should omit `const`
+  - definitions should mark parameters `const` by default, omitting `const` only when deliberate local mutation is required
+- Declare temporaries `const` by default unless mutation is intentional.
+- Prefer `constexpr` for compile-time literal constants when the type supports it.
+
+Example:
+
+```cpp
+void set_count(size_t count);                                                   // declaration
+
+void set_count(size_t const count) {                                            // definition
+  cached_count = count;
+}
+
+template<typename T>
+void push(T&& value) {
+  storage.emplace_back(std::forward<T>(value));
+}
+```
 
 ### 13.3 Output parameters and return values
 
@@ -778,7 +905,9 @@ Rule:
 
 Rule:
 
-- Use `[[nodiscard]]` on results that callers should not ignore (status, queried state, computed value objects).
+- Use `[[nodiscard]]` only where discarding the return value is itself an error.
+- Typical cases are pure/result-only functions with no meaningful side effects.
+- Do not overuse `[[nodiscard]]`; some getter-like calls may legitimately be used for side effects (tests, benchmarks, cache refresh paths).
 
 ### 13.6 `noexcept` guidance
 
@@ -792,13 +921,29 @@ Rule:
 Rule:
 
 - Prefer C++ standard-library function symbols with `std::` qualification (for example `std::abs` rather than `abs`).
-- Do not force `std::` qualification for type names where house style prefers unqualified forms (for example use `size_t`, not `std::size_t`, unless scope requires disambiguation).
+- Do not force `std::` qualification for type names where house style prefers unqualified forms (for example use `size_t`, not `std::size_t`).
 
 Example:
 
 ```cpp
 size_t const count{values.size()};
 double const magnitude{std::abs(delta)};
+```
+
+### 13.8 Unused parameter naming
+
+Rule:
+
+- Keep unused parameter names present but commented inline in definitions:
+  - `do_something(int /*value*/)`
+
+Example:
+
+```cpp
+void on_event(int /*event_type*/, void *data) {
+  state *s{static_cast<state*>(data)};
+  s->tick();
+}
 ```
 
 ## 14. Classes, Structs, and OOP
@@ -814,9 +959,19 @@ Rule:
 
 Rule:
 
-- Keep access sections explicit and ordered consistently.
 - Access labels are not indented inside class definitions.
-- Follow the member ordering rules defined in section 10.4.
+
+Example:
+
+```cpp
+class manager {
+public:
+  manager();
+
+private:
+  state current_state{};
+};
+```
 
 ### 14.3 Constructor and destructor conventions
 
@@ -901,7 +1056,7 @@ Rule:
 
 - Follow normal function formatting for lambda parameters and return type annotations.
 - Omit empty `()` for parameterless lambdas (modern C++ style).
-- Do not place a space between lambda introducer and opening brace for parameterless lambdas (`[]{`).
+- Do not place a space before a lambda body opening brace (`[]{`, `[](int v){ ... }`).
 
 Example:
 
@@ -1000,20 +1155,25 @@ Rule:
 - Use `///` for concise API intent and behavioral notes.
 - Function bodies should typically begin with a `///` documentary comment describing intent/behavior.
 - `///` comments at class declarations are encouraged to describe class purpose.
+- Function declarations should usually not repeat obvious intent comments; documentary comments belong primarily on definitions.
 - Full doxygen-style comments are allowed.
 - Doxygen parameter/return annotations are optional, but if used they must be correct and doxygen-compatible.
 
 Example:
 
 ```cpp
-/// Render the components of the world GUI
-void world_gui::draw(game_state &state);
+void world_gui::draw(game_state &state) {
+  /// Render the components of the world GUI for the current frame.
+  draw_windows(state);
+}
 
-/// Parse command line options.
+/// @brief Parse command line arguments for the launcher.
 /// @param argc Number of arguments.
 /// @param argv Argument values.
 /// @return true if launch should continue.
-bool parse_args(int argc, char const *argv[]);
+auto parse_args(int argc, char const *argv[])->bool {
+  return argc > 0 && argv != nullptr;
+}
 ```
 
 ### 18.3 Inline rationale comments
@@ -1023,10 +1183,20 @@ Rule:
 - Prefer same-line comments where appropriate.
 - Align inline comments to start at column 80 when practical.
 - If code already extends beyond column 80, place comment after one space rather than forcing a wrap.
+- When documenting scope intent, place the comment on the opening brace line, not the closing brace line.
 - Use shared tooling for alignment when possible:
   - `/home/slowriot/code/scripts/comment_aligner.sh`
   - `/home/slowriot/code/scripts/comment_aligner_project.sh`
   - `/home/slowriot/code/scripts/comment_aligner_cmake.sh`
+
+Example:
+
+```cpp
+{                                                                              // temporary loading scope
+  loader_context const ctx{build_loader_context()};
+  run_loader(ctx);
+}
+```
 
 ### 18.4 TODO/FIXME/HACK conventions
 
@@ -1076,6 +1246,13 @@ Rule:
 
 - Use assertions for invariants and programmer errors.
 - Use runtime checks for recoverable invalid input/state.
+- Prefer unique, clear assertion messages via `&& "..."` to make failures searchable without a debugger.
+
+Example:
+
+```cpp
+assert(buffer_size > 0 && "buffer_size must be positive in upload path");
+```
 
 ### 19.4 Failure message quality and consistency
 
@@ -1083,8 +1260,13 @@ Rule:
 
 - Keep messages specific and concise.
 - Avoid ambiguous error text that omits operation context.
+- Make error messages unique where practical so origin can be searched directly in code.
 
 ## 20. Concurrency and Threading Style
+
+Scope note:
+
+- This section defines conventions for how concurrency code is expressed and documented in this codebase.
 
 ### 20.1 Thread lifecycle conventions
 
@@ -1100,13 +1282,17 @@ Rule:
 
 - Keep lock scope minimal.
 - Use `std::mutex`/`std::condition_variable` patterns consistently and document shared-state expectations.
+- For simple synchronized shared values, `boost::synchronized_value` is preferred where available for RAII-friendly access patterns.
 
 ### 20.3 Atomic usage and memory-order style
 
 Rule:
 
 - Use atomics for simple shared flags/counters.
-- Default to strong ordering unless a weaker order is deliberately chosen and documented.
+- Prefer the weakest memory ordering that is correct for the use case.
+- `std::memory_order::relaxed` is common for simple counters/flags when no ordering relationship is required.
+- Stronger orderings should be used only when a clear cross-thread ordering requirement exists.
+- Remember that operations without an explicit memory order default to the strictest ordering (`seq_cst`).
 
 ### 20.4 Queue/event loop patterns
 
@@ -1209,6 +1395,7 @@ Rule:
 
 - Maintain a project `clang-format` configuration aligned with this guide.
 - Use tooling for mechanical consistency (especially include sorting and routine wrapping), while preserving readability-first exceptions.
+- Tooling should not force arbitrary line-break churn that reduces readability.
 
 ### 23.2 `clang-tidy` policy
 
@@ -1216,18 +1403,28 @@ Rule:
 
 - Use `clang-tidy` checks to enforce modernization and safety where practical.
 - Treat C-style cast detection and modernization checks as proactive cleanup targets.
+- Favor checks that catch real correctness/style violations over noisy preference checks.
 
 ### 23.3 CI validation hooks
 
 Rule:
 
 - Prefer automated checks for style-invariant rules (include order, whitespace, forbidden constructs).
+- High-value automated checks include:
+  - tabs/trailing-whitespace rejection
+  - include guard normalization toward `#pragma once`
+  - C-style cast detection
+  - forbidden `using namespace` (except allowed literal namespaces in source)
 
 ### 23.4 Review checklist
 
 Rule:
 
 - Human review should focus on readability and intent, not mechanical formatting already handled by tooling.
+- Review emphasis should include:
+  - performance-sensitive structure choices
+  - correctness of concurrency/atomic assumptions
+  - clarity and uniqueness of diagnostics/assertions
 
 ### 23.5 Editor configuration baseline
 
@@ -1237,6 +1434,7 @@ Rule:
   - use 2-space indentation
   - convert tabs to spaces
   - trim trailing and EOF whitespace on save
+- Comment-alignment tools should be used where applicable to maintain the column-80 inline comment convention.
 
 ## 24. Provisional Baseline (from current audit; pending confirmation)
 
