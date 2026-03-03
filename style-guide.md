@@ -38,6 +38,12 @@ Notes:
 - Uses reference style `type const &name`.
 - Uses brace initialization and designated initializers.
 
+## Table of Contents
+{: .no_toc}
+
+* TOC
+{:toc}
+
 ## 1. Scope and Authority
 
 ### 1.1 Language scope
