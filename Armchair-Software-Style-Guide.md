@@ -31,31 +31,17 @@ Purpose: capture Armchair Software house style for first-party C++.
 - Style fixes are proactive: when touching files, normalize code toward this guide.
 - Historical patterns that conflict with this guide should be treated as debt to remove, not precedent.
 
-## 2. Style Guide Method
+## 2. Guide Authority
 
-### 2.1 Evidence sources and audit manifest
-- Style rules are derived from first-party code and explicit house decisions.
-- When historical examples conflict, this document is authoritative.
+### 2.1 Source of truth
 
-### 2.2 Rule format per section
+- This document is the authoritative source of house style.
+- Historical code patterns that conflict with this document are debt, not precedent.
 
-- Each section should include:
-  - explicit rule text
-  - short rationale when non-obvious
-- Visual formatting rules should include at least one concrete example.
-- Multiple examples are encouraged where they improve clarity and readability of the guide.
+### 2.2 Ambiguity resolution
 
-### 2.3 Handling ambiguity and contradictory examples
-
-- Historical inconsistency is treated as debt, not precedent.
-- When examples conflict, the explicitly stated house rule wins.
-- Contradictions discovered later should be resolved by updating this guide, then normalizing code.
-
-### 2.4 Enforcement strategy (manual review / tooling / linting)
-
-- Mechanical style is enforced by tooling where possible.
-- Human review is expected to enforce full adherence to this guide.
-- Any divergence from this style guide is cause for rejection, including mechanical/style issues not resolved before review.
+- When examples conflict, follow the explicit rule text in this guide.
+- If a rule is unclear or contradictory, resolve it by updating this document, then normalize code to match.
 
 ## 3. File and Project Structure
 
@@ -137,10 +123,6 @@ world_manager.h
 - Convert legacy include guards to `#pragma once` proactively when files are touched.
 - Do not use dual guard style (`#pragma once` + `#ifndef`) in new or cleaned-up headers.
 
-Evidence:
-
-- Legacy code includes mixed guard styles; `#pragma once` is the standardized target.
-
 ### 5.2 Include block ordering
 
 - In `.cpp` files, include the matching local header first when one exists.
@@ -153,17 +135,12 @@ Evidence:
   - internal project general utilities
   - specific functional/class includes
 
-Evidence:
-
-- Matching-header-first is dominant in implementation files.
-- A minority of entrypoint files (`main.cpp` style programs) begin with standard library headers.
-
 ### 5.3 Grouping: standard, third-party, project-local
 
 - Keep include groups visually separated by one blank line.
 - Avoid interleaving groups unless required by platform/compiler constraints.
 - Prefer alphabetical sorting within each include group.
-- Sorting is primarily tooling-enforced, not manual-review-enforced.
+- Enforce include sorting with tooling and review; unsorted includes are style violations.
 
 ### 5.4 Blank lines between include groups
 
@@ -190,20 +167,11 @@ Evidence:
   - vertical alignment to a logical anchor, or
   - one extra 2-space step.
 
-Evidence:
-
-- 2-space block indentation is dominant in audited first-party code.
-
 ### 6.2 Tabs vs spaces
 
 - Use spaces for indentation in first-party C++.
 - Tabs are not idiomatic for first-party `.cpp/.h` files.
 - Editor configuration should convert tabs to spaces automatically.
-
-Evidence:
-
-- Tab usage appears only in generated files in current audits.
-- Hand-authored first-party `.cpp`/`.h` style is space-indented.
 
 ### 6.3 Trailing whitespace policy
 
@@ -211,27 +179,15 @@ Evidence:
 - Generated files may preserve generator output until generation is standardized.
 - Editor configuration should strip trailing whitespace and end-of-file whitespace automatically.
 
-Evidence:
-
-- Trailing whitespace appears only in generated `version.h` files.
-
 ### 6.4 Consecutive blank line policy
 
 - Use a single blank line to separate logical blocks.
 - Avoid multiple consecutive blank lines inside function bodies except when separating major phases.
 
-Evidence:
-
-- Typical style in all target repos uses single blank-line separators between blocks/declarations.
-
 ### 6.5 Horizontal alignment policy
 
 - Alignment is allowed for local readability when grouping related declarations.
 - Alignment is encouraged when it clearly improves readability.
-
-Observed patterns:
-
-- Aligned assignment blocks and aligned end-of-line comments are both common in first-party code.
 
 ### 6.6 Line length policy and exceptions
 
@@ -242,11 +198,6 @@ Observed patterns:
   - URLs and machine-oriented strings,
   - generated/string-table content,
   - dense expressions or comments where wrapping harms readability.
-
-Evidence:
-
-- Current codebase has many lines >120 columns, including legitimate long-string and table cases.
-- Extreme outliers are concentrated in data-heavy declarations (for example spinner tables).
 
 ### 6.7 Long statement wrapping and continuation indentation
 
@@ -290,11 +241,6 @@ public:
 
 - Opening brace stays on the same line as the condition.
 - Place `else` as `} else {`.
-
-Evidence:
-
-- Same-line control braces are dominant in first-party code.
-- `else` overwhelmingly appears on the same line as the prior closing brace.
 
 ### 7.3 Loop/switch brace style
 
@@ -376,11 +322,6 @@ if(ready) {                                                                     
 - Use no space before `(` in control statements:
   - `if(...)`, `for(...)`, `while(...)`, `switch(...)`, `catch(...)`
 
-Evidence:
-
-- Strong majority follows this style.
-- A small number of `catch (...)` and `if (...)` exceptions exist and should be normalized.
-
 ### 8.2 Function declaration/definition spacing
 
 - No space between function name and `(` in declarations and definitions.
@@ -402,10 +343,6 @@ Evidence:
   - `type *ptr`
   - `type &ref`
   - `type const &value`
-
-Evidence:
-
-- This style is dominant in all six codebases.
 
 ### 8.6 Template angle bracket spacing
 
@@ -562,7 +499,7 @@ Example:
 
 ```cpp
 int constexpr retries{3};
-std::string const name{"anchorhold"};
+std::string const name{"sample"};
 auto constexpr timeout{5s};
 ```
 
@@ -596,10 +533,6 @@ result = item{
 - C-style casts must be proactively removed from first-party C++.
 - When encountered, convert to the appropriate named cast.
 
-Current migration focus:
-
-- C-style casts in shared math/utility modules should be proactively converted.
-
 ### 11.6 Ternary operator formatting
 
 - Keep short ternaries inline.
@@ -630,6 +563,7 @@ if(!(now < deadline && (queue_size < max_queue_size || allow_overflow))) {
 
 - When the desired type is unambiguous from context, prefer implicit type deduction over repeating the type.
 - In typed return contexts, prefer `return {...};` over `return explicit_type{...};`.
+- Use explicit type spelling when deduction is not available at that declaration site (for example function parameters and non-static data members).
 
 Example:
 
@@ -916,10 +850,6 @@ auto tick{[]{
 - Close conditionals with explicit comments:
   - `#endif // DEBUG_FEATURE`
 
-Evidence:
-
-- End-of-block comments on `#endif` are the dominant style in all six projects.
-
 Example:
 
 ```cpp
@@ -977,10 +907,10 @@ auto parse_args(int argc, char const *argv[])->bool {
 - In function bodies and inline code comments, start comments lowercase unless grammar/acronyms require otherwise.
 - For one-line comments, avoid trailing punctuation to reduce visual noise.
 - `///` documentary comments should start with capitalized text.
-- Use shared tooling for alignment when possible:
-  - `/home/slowriot/code/scripts/comment_aligner.sh`
-  - `/home/slowriot/code/scripts/comment_aligner_project.sh`
-  - `/home/slowriot/code/scripts/comment_aligner_cmake.sh`
+- Use shared `scripts` repo comment-alignment tools when possible:
+  - `comment_aligner.sh`
+  - `comment_aligner_project.sh`
+  - `comment_aligner_cmake.sh`
 
 Example:
 
@@ -1045,10 +975,6 @@ assert(buffer_size > 0 && "buffer_size must be positive in upload path");
 
 ## 20. Concurrency and Threading Style
 
-Scope note:
-
-- This section defines conventions for how concurrency code is expressed and documented in this codebase.
-
 ### 20.1 Thread lifecycle conventions
 
 - Make thread ownership and shutdown paths explicit.
@@ -1092,7 +1018,7 @@ while(keep_running) {
 
 - Use 2-space indentation inside command argument blocks.
 - Keep long lists (`set(...)`, `add_executable(...)`, warning flags) one item per line.
-- Use uppercase command names consistently as already established in these repos.
+- Use uppercase command names consistently.
 
 ### 21.2 Condition and build-type block style
 
@@ -1169,53 +1095,16 @@ while(keep_running) {
 - Commit messages should describe what changed, not how or why.
 - No commit-signing requirement is imposed by this style guide.
 
-Observed in current project histories:
+## 24. Enforcement
 
-- Common pattern is concise imperative summary subjects.
-- Shared-library sync commits commonly use explicit provenance text, for example:
-  - `Auto-update from libvoxelstorm: ... (<upstream-hash>)`
-- This provenance pattern is recommended for cross-project synchronized updates.
-
-## 24. Tooling and Enforcement
-
-### 24.1 `clang-format` policy
-
-- Maintain a project `clang-format` configuration aligned with this guide.
-- Use tooling for mechanical consistency (especially include sorting and routine wrapping), while preserving readability-first exceptions.
-- Tooling should not force arbitrary line-break churn that reduces readability.
-
-### 24.2 `clang-tidy` policy
-
-- Use `clang-tidy` checks to enforce modernization and safety where practical.
-- Treat C-style cast detection and modernization checks as proactive cleanup targets.
-- Favor checks that catch real correctness/style violations over noisy preference checks.
-
-### 24.3 CI validation hooks
-
-- Prefer automated checks for style-invariant rules (include order, whitespace, forbidden constructs).
-- High-value automated checks include:
-  - tabs/trailing-whitespace rejection
-  - include guard normalization toward `#pragma once`
-  - C-style cast detection
-  - forbidden `using namespace` (except allowed literal namespaces in source)
-
-### 24.4 Review checklist
-
-- Human review must enforce full code quality and strict adherence to this style guide.
+- Human review enforces full adherence to this style guide.
 - Any unresolved divergence from guide rules is a valid reason to reject the change.
-- Review emphasis includes:
-  - style compliance and formatting correctness
-  - performance-sensitive structure choices
-  - correctness of concurrency/atomic assumptions
-  - clarity and uniqueness of diagnostics/assertions
-
-### 24.5 Editor configuration baseline
-
-- Editors should be configured to:
-  - use 2-space indentation
-  - convert tabs to spaces
-  - trim trailing and EOF whitespace on save
-- Comment-alignment tools should be used where applicable to maintain the column-80 inline comment convention.
+- Automated checks should enforce deterministic style constraints:
+  - tabs/trailing-whitespace rejection
+  - include-order validation
+  - `#pragma once` enforcement in first-party headers
+  - C-style cast detection
+  - forbidden `using namespace` (except allowed literal namespaces in source files)
 
 ## 25. Baseline Example
 
@@ -1224,10 +1113,12 @@ namespace example {
 
 struct run_state {
   bool keep_running{true};
-  std::chrono::seconds timeout{5s};
+  size_t retry_limit{3};
 };
 
 auto process_item(item const &source, item &target)->bool {
+  auto constexpr timeout{5s};
+  if(source.age() > timeout) return false;
   if(!source.valid()) return false;
 
   target = item{
@@ -1248,13 +1139,3 @@ Notes:
 - Uses no space before control parentheses.
 - Uses reference style `type const &name`.
 - Uses brace initialization and designated initializers.
-
-## 26. Resolved Decisions (2026-03-03 Review)
-
-1. Control keywords use attached parentheses: `if(`, `for(`, `catch(`.
-2. Headers use `#pragma once`; legacy include guards should be proactively migrated.
-3. Include order is standardized with explicit group tiers from local header to specific project includes.
-4. No hard line-length limit; readability first, and avoid forced wrapping.
-5. Vertical alignment is encouraged when it improves clarity.
-6. `switch`/`case` formatting uses case labels aligned with `switch`, with case body statements indented.
-7. Inline comments are preferred where appropriate and aligned to column 80 when practical.
