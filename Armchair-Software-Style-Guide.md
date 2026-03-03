@@ -514,6 +514,33 @@ enum class colour : uint8_t {
 };
 ```
 
+### 10.11 Bitmask enum style
+
+- Use `enum class` for flags/bitmasks, with an explicit unsigned underlying type.
+- Name bit values in lowercase snake_case, and make bit positions explicit.
+- Keep bitwise operator helpers local to the owning namespace/type.
+- Avoid mixing raw integers with flags at call sites; use typed helpers.
+
+Example:
+
+```cpp
+enum class render_flags : uint32_t {
+  none = 0u,
+  shadows = 1u << 0,
+  bloom = 1u << 1,
+  vsync = 1u << 2,
+};
+
+constexpr auto operator|(render_flags lhs, render_flags rhs)->render_flags {
+  return static_cast<render_flags>(
+      static_cast<uint32_t>(lhs) | static_cast<uint32_t>(rhs));
+}
+
+constexpr auto has_flag(render_flags value, render_flags flag)->bool {
+  return (static_cast<uint32_t>(value) & static_cast<uint32_t>(flag)) != 0u;
+}
+```
+
 ## 11. Initialization and Expressions
 
 ### 11.1 Uniform initialization (house preference: universal braces)
