@@ -1,6 +1,42 @@
 # Armchair Software Style Guide
 
-Purpose: formalise Armchair Software C++ programming style and guide contributors working on Armchair projects.
+This document defines Armchair Software's house style for C++ and related build/script files.
+Use it as the default reference when writing or reviewing code in Armchair projects.
+When existing code differs, follow this guide and normalise touched code toward it.
+
+## 0. Baseline Example
+
+```cpp
+namespace example {
+
+struct run_state {
+  bool keep_running{true};
+  unsigned int retry_limit{3};
+};
+
+auto process_item(item const &source, item &target)->bool {
+  auto constexpr timeout{5s};
+  if(source.age() > timeout) return false;
+  if(!source.valid()) return false;
+
+  target = item{
+    .id{source.id},
+    .name{source.name},
+  };
+
+  return true;
+}
+
+} // namespace example
+```
+
+Notes:
+
+- Uses 2-space indentation.
+- Uses attached braces.
+- Uses no space before control parentheses.
+- Uses reference style `type const &name`.
+- Uses brace initialization and designated initializers.
 
 ## 1. Scope and Authority
 
@@ -1226,37 +1262,3 @@ target_link_libraries(example_tool
   - `#pragma once` enforcement in first-party headers
   - C-style cast detection
   - forbidden `using namespace` (except allowed literal namespaces in source files)
-
-## 24. Baseline Example
-
-```cpp
-namespace example {
-
-struct run_state {
-  bool keep_running{true};
-  unsigned int retry_limit{3};
-};
-
-auto process_item(item const &source, item &target)->bool {
-  auto constexpr timeout{5s};
-  if(source.age() > timeout) return false;
-  if(!source.valid()) return false;
-
-  target = item{
-    .id{source.id},
-    .name{source.name},
-  };
-
-  return true;
-}
-
-} // namespace example
-```
-
-Notes:
-
-- Uses 2-space indentation.
-- Uses attached braces.
-- Uses no space before control parentheses.
-- Uses reference style `type const &name`.
-- Uses brace initialization and designated initializers.
