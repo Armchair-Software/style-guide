@@ -67,7 +67,8 @@ Rule:
 - Each section should include:
   - explicit rule text
   - short rationale when non-obvious
-  - one concrete formatting example when useful
+- Visual formatting rules should include at least one concrete example.
+- Multiple examples are encouraged where they improve clarity and readability of the guide.
 
 ### 2.3 Handling ambiguity and contradictory examples
 
@@ -82,8 +83,8 @@ Rule:
 Rule:
 
 - Mechanical style is enforced by tooling where possible.
-- Human review focuses on intent, readability, and correctness.
-- Manual review should not reject code for purely mechanical issues already covered by automation.
+- Human review is expected to enforce full adherence to this guide.
+- Any divergence from this style guide is cause for rejection, including mechanical/style issues not resolved before review.
 
 ## 3. File and Project Structure
 
@@ -93,6 +94,9 @@ Rule:
 
 - Keep source grouped by subsystem/domain (`render`, `gui`, `world`, `net`, etc.).
 - Keep shared internal libraries in clearly named module directories (`vectorstorm`, `logstorm`, `timestorm`, etc.).
+- `*storm` libraries synchronized through `libvoxelstorm` must not be renamed or structurally reorganized locally.
+- Improvements to synchronized libraries are encouraged, but should avoid breaking changes and remain suitable for upstream redistribution.
+- Local edits in synchronized libraries are expected to be reviewed for upstream inclusion in `libvoxelstorm`.
 
 ### 3.2 Directory naming conventions
 
@@ -126,7 +130,8 @@ Rule:
 
 Rule:
 
-- Test files belong in dedicated test paths and are excluded from style authority unless explicitly in scope for house style extraction.
+- Test files should live in dedicated test paths.
+- Test sources are style-authoritative and must follow the same style rules as production sources.
 
 ### 3.7 Asset and non-code file placement
 
@@ -220,21 +225,21 @@ Rule:
 
 ### 5.4 Blank lines between include groups
 
-Draft rule:
+Rule:
 
 - Use one blank line between include groups.
 - Avoid extra blank lines inside a single include group.
 
 ### 5.5 Forward declaration preferences vs includes
 
-Draft rule (provisional):
+Rule:
 
 - Prefer forward declarations in headers when only pointer/reference members are needed.
 - Include full headers in `.cpp` where definitions are used.
 
 ### 5.6 Include path style (`"..."` vs `<...>`)
 
-Draft rule:
+Rule:
 
 - Use `"..."` for project-local headers.
 - Use `<...>` for standard library and external libraries.
@@ -243,7 +248,7 @@ Draft rule:
 
 ### 6.1 Indentation width
 
-Draft rule:
+Rule:
 
 - Use 2 spaces per indentation level.
 - Do not use 4-space block indentation.
@@ -288,7 +293,7 @@ Evidence:
 
 ### 6.4 Consecutive blank line policy
 
-Draft rule:
+Rule:
 
 - Use a single blank line to separate logical blocks.
 - Avoid multiple consecutive blank lines inside function bodies except when separating major phases.
@@ -363,7 +368,7 @@ Rule:
 
 ### 7.1 Function/class/struct brace placement
 
-Draft rule:
+Rule:
 
 - Use attached braces for functions, classes, structs, and namespaces.
 
@@ -378,7 +383,7 @@ public:
 
 ### 7.2 `if/else` brace and `else` placement
 
-Draft rule:
+Rule:
 
 - Opening brace stays on the same line as the condition.
 - Place `else` as `} else {`.
@@ -390,7 +395,7 @@ Evidence:
 
 ### 7.3 Loop/switch brace style
 
-Draft rule:
+Rule:
 
 - Use attached braces for `for(...)`, `while(...)`, and `switch(...)`.
 - Keep `case` labels at the same indentation level as `switch`.
@@ -414,7 +419,7 @@ case mode_type::b:
 
 ### 7.4 Namespace brace style and closing comments
 
-Draft rule (provisional):
+Rule:
 
 - Prefer a closing namespace comment for non-trivial scopes:
   - `} // namespace module::submodule`
@@ -422,7 +427,7 @@ Draft rule (provisional):
 
 ### 7.5 Lambda brace style
 
-Draft rule:
+Rule:
 
 - Use attached braces for lambda bodies.
 - Format lambda internals the same way as ordinary function bodies.
@@ -438,7 +443,7 @@ auto predicate{[&](int value) {
 
 ### 7.6 Single-line statement policy
 
-Draft rule:
+Rule:
 
 - Single-line guard clauses are acceptable for simple exits:
   - `if(!ready) return;`
@@ -477,7 +482,7 @@ Rule:
 
 ### 8.1 Control statement spacing (`if(` vs `if (` etc.)
 
-Draft rule:
+Rule:
 
 - Use no space before `(` in control statements:
   - `if(...)`, `for(...)`, `while(...)`, `switch(...)`, `catch(...)`
@@ -489,28 +494,28 @@ Evidence:
 
 ### 8.2 Function declaration/definition spacing
 
-Draft rule:
+Rule:
 
 - No space between function name and `(` in declarations and definitions.
 - Trailing return type examples use `auto f()->T` without spaces around `->`.
 
 ### 8.3 Operator spacing (arithmetic, assignment, comparison, logical)
 
-Draft rule:
+Rule:
 
 - Use spaces around binary operators.
 - Keep unary operators compact (`++i`, `!flag`).
 
 ### 8.4 Comma/semicolon/colon spacing
 
-Draft rule:
+Rule:
 
 - One space after commas.
 - No space before commas or semicolons.
 
 ### 8.5 Pointer/reference spacing
 
-Draft rule:
+Rule:
 
 - Bind pointer/reference symbols to the type side:
   - `type *ptr`
@@ -523,13 +528,13 @@ Evidence:
 
 ### 8.6 Template angle bracket spacing
 
-Draft rule:
+Rule:
 
 - No extra spaces inside template angle brackets.
 
 ### 8.7 Cast spacing
 
-Draft rule:
+Rule:
 
 - Prefer named casts with regular call spacing:
   - `static_cast<T>(value)`
@@ -548,27 +553,27 @@ Rule:
 
 ### 9.1 Namespace names
 
-Draft rule:
+Rule:
 
 - Use lowercase snake_case namespace names.
 - Prefer nested namespace syntax where suitable (`namespace annstorm::neat {`).
 
 ### 9.2 Type names (class/struct/enum/alias)
 
-Draft rule:
+Rule:
 
 - Use lowercase snake_case for project-defined type names.
 - `enum class` names follow the same pattern (`exposure_type`, `timescale`).
 
 ### 9.3 Function and method names
 
-Draft rule:
+Rule:
 
 - Use lowercase snake_case (`get_open_price`, `apply_level_update`, `read_output`).
 
 ### 9.4 Variable names
 
-Draft rule:
+Rule:
 
 - Use lowercase snake_case for local variables and non-member state.
 - Allow short loop counters (`i`, `x`, `y`, `z`) in narrow scopes.
@@ -577,33 +582,33 @@ Draft rule:
 
 ### 9.5 Member names
 
-Draft rule:
+Rule:
 
 - Use lowercase snake_case without `m_`/`_` prefixes.
 - Keep member names identical to conceptual domain terms.
 
 ### 9.6 Constants and `constexpr` names
 
-Draft rule:
+Rule:
 
 - Use lowercase snake_case for `constexpr` and `const` object names.
 - Macro-style uppercase is reserved for preprocessor constants.
 
 ### 9.7 Macro names
 
-Draft rule:
+Rule:
 
 - Use `UPPER_SNAKE_CASE` for preprocessor symbols (`DEBUG_WEBGPU`, `BOOST_NO_EXCEPTIONS`).
 
 ### 9.8 Enum value names
 
-Draft rule:
+Rule:
 
 - Use lowercase snake_case enumerators (`none`, `up`, `down`, `diagonal`).
 
 ### 9.9 Template parameter names
 
-Draft rule:
+Rule:
 
 - Use short UpperCamel or single-letter template parameter names (`T`, `FromT`, `Tcpp`, `Tc`).
 
@@ -620,14 +625,14 @@ Rule:
 
 ### 10.1 `auto` usage policy
 
-Draft rule:
+Rule:
 
 - Use `auto` when type is obvious from initializer or when avoiding repetition improves clarity.
 - Avoid `auto` when it obscures important concrete type semantics.
 
 ### 10.2 Trailing return type style (`auto f()->T`)
 
-Draft rule:
+Rule:
 
 - Trailing return style is allowed but not preferred by default.
 - It is encouraged for entry points and callback-heavy signatures.
@@ -635,7 +640,7 @@ Draft rule:
 
 ### 10.3 Reference and const placement style
 
-Draft rule:
+Rule:
 
 - Use east-const with left-bound reference/pointer symbols:
   - `type const &value`
@@ -657,19 +662,19 @@ Rule:
 
 ### 10.5 Initializer list formatting
 
-Draft rule:
+Rule:
 
 - For multi-member constructor initialization, place each initializer on its own line under `:`.
 
 ### 10.6 Default member initialization
 
-Draft rule:
+Rule:
 
 - Prefer in-class member initialization with braces for defaults.
 
 ### 10.7 `using` aliases and `typedef` policy
 
-Draft rule:
+Rule:
 
 - Prefer `using` over `typedef`.
 - Use alias names that preserve existing lowercase snake_case conventions.
@@ -735,7 +740,7 @@ result = item{
 
 ### 11.4 Literal formatting (`1.0f`, digit separators, chrono literals)
 
-Draft rule:
+Rule:
 
 - Use explicit suffixes where type clarity matters (`1.0f`, `5s`).
 - Use digit separators for large literals when it improves readability (`100'000'000.0f`).
@@ -755,7 +760,7 @@ Current migration targets identified during scan:
 
 ### 11.6 Ternary operator formatting
 
-Draft rule:
+Rule:
 
 - Keep short ternaries inline.
 - For long ternaries, wrap cleanly and keep branches simple enough to scan.
@@ -787,7 +792,7 @@ if(!(now < deadline && (queue_size < max_queue_size || allow_overflow))) {
 
 ### 12.1 Early exit vs deep nesting
 
-Draft rule:
+Rule:
 
 - Prefer early exits (`return`, `continue`) to reduce nested indentation.
 - Use guard clauses for invalid/empty/error states.
@@ -795,14 +800,14 @@ Draft rule:
 
 ### 12.2 Condition complexity thresholds
 
-Draft rule:
+Rule:
 
 - Keep complex conditions readable; extract named booleans when expressions become dense.
 - Prefer `if` init-statements when a temporary is only needed for the condition/body.
 
 ### 12.3 `switch` style and exhaustiveness handling
 
-Draft rule:
+Rule:
 
 - Prefer `switch` for closed enum dispatch.
 - Avoid silent fallback behavior; enforce exhaustiveness where practical.
@@ -810,7 +815,7 @@ Draft rule:
 
 ### 12.4 Loop form preferences (`for`, range-for, `while`)
 
-Draft rule:
+Rule:
 
 - Prefer range-for when iterating container elements directly.
 - Use indexed `for` where indices are semantically meaningful.
@@ -841,16 +846,14 @@ Example:
 
 ```cpp
 void process() {
-  /// Validate input and fast-fail.
+  /// Validate input and fast-fail
   if(!ready) return;
 
-  {
-    /// Setup phase.
+  {                                                                              // setup phase
     setup_context const ctx{build_context()};
     state.setup(ctx);
   }
 
-  /// Main work phase kept inline for traceability and optimization.
   for(size_t i{0}; i != items.size(); ++i) {
     state.update(items[i]);
   }
@@ -878,6 +881,10 @@ void set_count(size_t count);                                                   
 
 void set_count(size_t const count) {                                            // definition
   cached_count = count;
+}
+
+void set_name(std::string name) {
+  current_name = std::move(name);
 }
 
 template<typename T>
@@ -940,9 +947,8 @@ Rule:
 Example:
 
 ```cpp
-void on_event(int /*event_type*/, void *data) {
-  state *s{static_cast<state*>(data)};
-  s->tick();
+void write_metric(std::string const &name, int /*sample_count*/) {
+  metrics.emplace_back(name);
 }
 ```
 
@@ -1084,14 +1090,14 @@ Rule:
 
 ### 17.1 Standard attributes (`[[nodiscard]]`, `[[maybe_unused]]`, `[[likely]]`)
 
-Draft rule:
+Rule:
 
 - Use standard attributes where they communicate API intent or branch likelihood.
 - Place attributes immediately before the declaration they modify.
 
 ### 17.2 Compiler attributes (`[[gnu::pure]]`, etc.)
 
-Draft rule:
+Rule:
 
 - Compiler attributes are encouraged when likely to be useful.
 - Prefer GNU-compatible attributes because target toolchains are GCC and Clang.
@@ -1099,7 +1105,7 @@ Draft rule:
 
 ### 17.3 `#define` naming and scope
 
-Draft rule:
+Rule:
 
 - Use `UPPER_SNAKE_CASE` macro names.
 - Keep debug feature toggles local to file scope when possible.
@@ -1107,14 +1113,14 @@ Draft rule:
 
 ### 17.4 Conditional compilation (`#if`, `#ifdef`, `#ifndef`) style
 
-Draft rule:
+Rule:
 
 - Use `#ifdef`/`#ifndef` for feature flags and debug toggles.
 - Keep branch bodies indented to surrounding block style.
 
 ### 17.5 Indentation and comments for preprocessor blocks
 
-Draft rule:
+Rule:
 
 - `#if`/`#ifdef` directives may be indented to match surrounding code.
 - Close conditionals with explicit comments:
@@ -1134,7 +1140,7 @@ Example:
 
 ### 17.6 Debug flag conventions
 
-Draft rule:
+Rule:
 
 - Use `DEBUG_*` naming for file/module debug toggles.
 - Keep toggles near file top for discoverability.
@@ -1154,8 +1160,8 @@ Rule:
 
 - Use `///` for concise API intent and behavioral notes.
 - Function bodies should typically begin with a `///` documentary comment describing intent/behavior.
-- `///` comments at class declarations are encouraged to describe class purpose.
 - Function declarations should usually not repeat obvious intent comments; documentary comments belong primarily on definitions.
+- In classes, prefer inline comments on data members over documentary comments on member declarations.
 - Full doxygen-style comments are allowed.
 - Doxygen parameter/return annotations are optional, but if used they must be correct and doxygen-compatible.
 
@@ -1163,14 +1169,14 @@ Example:
 
 ```cpp
 void world_gui::draw(game_state &state) {
-  /// Render the components of the world GUI for the current frame.
+  /// Render the components of the world GUI for the current frame
   draw_windows(state);
 }
 
-/// @brief Parse command line arguments for the launcher.
-/// @param argc Number of arguments.
-/// @param argv Argument values.
-/// @return true if launch should continue.
+/// @brief Parse command line arguments for the launcher
+/// @param argc Number of arguments
+/// @param argv Argument values
+/// @return true if launch should continue
 auto parse_args(int argc, char const *argv[])->bool {
   return argc > 0 && argv != nullptr;
 }
@@ -1184,6 +1190,9 @@ Rule:
 - Align inline comments to start at column 80 when practical.
 - If code already extends beyond column 80, place comment after one space rather than forcing a wrap.
 - When documenting scope intent, place the comment on the opening brace line, not the closing brace line.
+- In function bodies and inline code comments, start comments lowercase unless grammar/acronyms require otherwise.
+- For one-line comments, avoid trailing punctuation to reduce visual noise.
+- `///` documentary comments should start with capitalized text.
 - Use shared tooling for alignment when possible:
   - `/home/slowriot/code/scripts/comment_aligner.sh`
   - `/home/slowriot/code/scripts/comment_aligner_project.sh`
@@ -1317,7 +1326,7 @@ while(keep_running) {
 
 ### 21.1 Indentation and list formatting
 
-Draft rule:
+Rule:
 
 - Use 2-space indentation inside command argument blocks.
 - Keep long lists (`set(...)`, `add_executable(...)`, warning flags) one item per line.
@@ -1325,7 +1334,7 @@ Draft rule:
 
 ### 21.2 Condition and build-type block style
 
-Draft rule:
+Rule:
 
 - Normalize build type with `string(TOLOWER ...)` and branch on explicit values.
 - Keep one responsibility per conditional block (build mode, exception mode, feature toggles).
@@ -1333,17 +1342,18 @@ Draft rule:
 
 ### 21.3 Target declarations and grouping
 
-Draft rule:
+Rule:
 
 - Group sources by role using comments:
   - project-specific
   - shared/internal libs
   - third-party
 - Keep `target_link_libraries`, `target_compile_options`, and `target_link_options` in separate clear blocks.
+- Do not use source globbing for build targets; list files explicitly.
 
 ### 21.4 Compile/link options layout
 
-Draft rule:
+Rule:
 
 - Keep compile/link options in named variables when reused.
 - Keep warnings and optimization flags grouped with comment headers for readability.
@@ -1352,7 +1362,7 @@ Draft rule:
 
 ### 22.1 Shebang and safety defaults
 
-Draft rule:
+Rule:
 
 - Use `#!/bin/bash`.
 - Prefer explicit failure checks (`|| exit 1`) for critical commands.
@@ -1360,14 +1370,14 @@ Draft rule:
 
 ### 22.2 Variable naming and quoting
 
-Draft rule:
+Rule:
 
 - Use lowercase snake_case for script variables (`build_dir`, `compiled_resources_total`).
 - Quote variable expansions unless intentional word-splitting is required.
 
 ### 22.3 Conditionals, loops, and spacing
 
-Draft rule:
+Rule:
 
 - Use `[ ... ]` condition style consistently with spaces around brackets.
 - Use straightforward `for` loops over arrays for file batches.
@@ -1375,21 +1385,62 @@ Draft rule:
 
 ### 22.4 Command failure handling
 
-Draft rule:
+Rule:
 
 - Use `|| exit 1` on build-critical commands (`cmake`, `make`, resource compilation).
 - Check presence of optional tools before use (`which ccache`, `which naga`).
 
 ### 22.5 Logging output conventions
 
-Draft rule:
+Rule:
 
 - Use short, explicit `echo` status messages.
 - Preserve the current convention of redirecting stdout to stderr for script status logs where used (`exec 1>&2`).
 
-## 23. Tooling and Enforcement
+## 23. Revision Control
 
-### 23.1 `clang-format` policy
+### 23.1 Line endings
+
+Rule:
+
+- Commit text files with Unix line endings (`LF`) only.
+- Configure Git to avoid unintended CRLF churn:
+  - on Unix-like systems, prefer `git config --global core.autocrlf input`
+- Repository-level attributes should enforce LF where practical.
+
+### 23.2 Committed file permissions
+
+Rule:
+
+- Non-executable committed files should use mode `664`.
+- Executable files (scripts/tools intended to run directly) should use mode `775`.
+- Do not set executable bits on non-executable source/data files.
+
+### 23.3 Commit structure
+
+Rule:
+
+- Commits should be frequent and atomic (ideally one feature or one tightly scoped change per commit).
+- Avoid bundling unrelated changes in a single commit.
+
+### 23.4 Commit message style
+
+Rule:
+
+- Keep subject lines clear, brief, and specific.
+- Commit messages should describe what changed, not how or why.
+- No commit-signing requirement is imposed by this style guide.
+
+Observed in current project histories:
+
+- Common pattern is concise imperative summary subjects.
+- Shared-library sync commits commonly use explicit provenance text, for example:
+  - `Auto-update from libvoxelstorm: ... (<upstream-hash>)`
+- This provenance pattern is recommended for cross-project synchronized updates.
+
+## 24. Tooling and Enforcement
+
+### 24.1 `clang-format` policy
 
 Rule:
 
@@ -1397,7 +1448,7 @@ Rule:
 - Use tooling for mechanical consistency (especially include sorting and routine wrapping), while preserving readability-first exceptions.
 - Tooling should not force arbitrary line-break churn that reduces readability.
 
-### 23.2 `clang-tidy` policy
+### 24.2 `clang-tidy` policy
 
 Rule:
 
@@ -1405,7 +1456,7 @@ Rule:
 - Treat C-style cast detection and modernization checks as proactive cleanup targets.
 - Favor checks that catch real correctness/style violations over noisy preference checks.
 
-### 23.3 CI validation hooks
+### 24.3 CI validation hooks
 
 Rule:
 
@@ -1416,17 +1467,19 @@ Rule:
   - C-style cast detection
   - forbidden `using namespace` (except allowed literal namespaces in source)
 
-### 23.4 Review checklist
+### 24.4 Review checklist
 
 Rule:
 
-- Human review should focus on readability and intent, not mechanical formatting already handled by tooling.
-- Review emphasis should include:
+- Human review must enforce full code quality and strict adherence to this style guide.
+- Any unresolved divergence from guide rules is a valid reason to reject the change.
+- Review emphasis includes:
+  - style compliance and formatting correctness
   - performance-sensitive structure choices
   - correctness of concurrency/atomic assumptions
   - clarity and uniqueness of diagnostics/assertions
 
-### 23.5 Editor configuration baseline
+### 24.5 Editor configuration baseline
 
 Rule:
 
@@ -1436,7 +1489,7 @@ Rule:
   - trim trailing and EOF whitespace on save
 - Comment-alignment tools should be used where applicable to maintain the column-80 inline comment convention.
 
-## 24. Provisional Baseline (from current audit; pending confirmation)
+## 25. Baseline Example
 
 ```cpp
 namespace example {
@@ -1468,7 +1521,7 @@ Notes:
 - Uses reference style `type const &name`.
 - Uses brace initialization and designated initializers.
 
-## 25. Resolved Decisions (2026-03-03 Review)
+## 26. Resolved Decisions (2026-03-03 Review)
 
 1. Control keywords use attached parentheses: `if(`, `for(`, `catch(`.
 2. Headers use `#pragma once`; legacy include guards should be proactively migrated.
