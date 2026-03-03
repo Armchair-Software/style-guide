@@ -28,7 +28,7 @@ Purpose: capture Armchair Software house style for first-party C++.
 
 ### 1.5 Migration policy for existing inconsistent code
 
-- Style fixes are proactive: when touching files, normalize code toward this guide.
+- Style fixes are proactive: when touching files, normalise code toward this guide.
 - Historical patterns that conflict with this guide should be treated as debt to remove, not precedent.
 
 ## 2. Guide Authority
@@ -41,7 +41,7 @@ Purpose: capture Armchair Software house style for first-party C++.
 ### 2.2 Ambiguity resolution
 
 - When examples conflict, follow the explicit rule text in this guide.
-- If a rule is unclear or contradictory, resolve it by updating this document, then normalize code to match.
+- If a rule is unclear or contradictory, resolve it by updating this document, then normalise code to match.
 
 ## 3. File and Project Structure
 
@@ -49,9 +49,9 @@ Purpose: capture Armchair Software house style for first-party C++.
 
 - Keep source grouped by subsystem/domain (`render`, `gui`, `world`, `net`, etc.).
 - Keep shared internal libraries in clearly named module directories (`vectorstorm`, `logstorm`, `timestorm`, etc.).
-- `*storm` libraries synchronized through `libvoxelstorm` must not be renamed or structurally reorganized locally.
-- Improvements to synchronized libraries are encouraged, but should avoid breaking changes and remain suitable for upstream redistribution.
-- Local edits in synchronized libraries are expected to be reviewed for upstream inclusion in `libvoxelstorm`.
+- `*storm` libraries synchronised through `libvoxelstorm` must not be renamed or structurally reorganized locally.
+- Improvements to synchronised libraries are encouraged, but should avoid breaking changes and remain suitable for upstream redistribution.
+- Local edits in synchronised libraries are expected to be reviewed for upstream inclusion in `libvoxelstorm`.
 
 ### 3.2 Directory naming conventions
 
@@ -112,7 +112,7 @@ world_manager.h
 ### 4.4 Special filenames (`main.cpp`, `version.h`, `protocol.h`)
 
 - `main.cpp` is reserved for entry points.
-- `version.h` and similar generated metadata files may be mechanically produced, but should be normalized toward guide style where feasible.
+- `version.h` and similar generated metadata files may be mechanically produced, but should be normalised toward guide style where feasible.
 - Shared protocol/interface files should use stable, predictable naming (`protocol.h`) and live near owning module roots.
 
 ## 5. File Prologue and Includes
@@ -215,7 +215,7 @@ logger << "DEBUG: on_close, event_type " << event_type
        << ", reason: \"" << event->reason << "\"";
 ```
 
-### 6.8 Editor behavior and defaults
+### 6.8 Editor behaviour and defaults
 
 - Configure editors to:
   - use 2-space tab width
@@ -413,6 +413,11 @@ if(ready) {                                                                     
 - Do not place `using namespace ...literals` in headers, to avoid namespace pollution for includers.
 - Namespace aliases are permitted only when they clearly improve legibility and do not introduce ambiguity.
 
+### 9.11 Language and spelling conventions
+
+- Prefer British English spellings in identifiers, comments, and diagnostics (`colour`, `synchronised`, `initialise`).
+- Keep externally defined spellings unchanged when interfacing with third-party APIs, protocols, schemas, or file formats.
+
 ## 10. Declarations and Definitions
 
 ### 10.1 `auto` usage policy
@@ -476,15 +481,37 @@ std::string const &name_ref{source.name};
 ### 10.9 Integer signedness defaults
 
 - Prefer unsigned integer types for counters, sizes, indices, and quantities that cannot logically be negative.
+- For general non-negative counters/state where no width contract is required, prefer `unsigned int` by default.
+- Use `size_t` when interacting with container sizes/indices or when size-width semantics are required.
+- Avoid narrow fixed-width integer types (`uint8_t`, `uint16_t`) unless data layout/memory packing requirements or benchmarks justify them.
 - Use signed integers only when negative values are meaningful and expected by the domain.
 
 Example:
 
 ```cpp
+unsigned int retry_limit{3};
 size_t const item_count{items.size()};
 for(size_t i{0}; i != item_count; ++i) {
   process(items[i]);
 }
+```
+
+### 10.10 Enum declarations and underlying types
+
+- Prefer scoped enums (`enum class`) over unscoped enums.
+- Use lowercase snake_case names for enum types and enumerators.
+- If an enum is stored/transmitted/packed, specify an explicit underlying type sized to the value range (for example `uint8_t`).
+- For purely internal enums without storage/ABI constraints, an explicit underlying type is optional.
+- Convert enums explicitly when integer conversion is required (`static_cast`), rather than relying on implicit conversion.
+
+Example:
+
+```cpp
+enum class colour : uint8_t {
+  red,
+  green,
+  blue,
+};
 ```
 
 ## 11. Initialization and Expressions
@@ -594,7 +621,7 @@ auto build_config()->config {
 ### 12.3 `switch` style and exhaustiveness handling
 
 - Prefer `switch` for closed enum dispatch.
-- Avoid silent fallback behavior; enforce exhaustiveness where practical.
+- Avoid silent fallback behaviour; enforce exhaustiveness where practical.
 - When intentionally exhaustive, omit `default` and document intent.
 
 ### 12.4 Loop form preferences (`for`, range-for, `while`)
@@ -614,10 +641,10 @@ auto build_config()->config {
 
 ### 13.1 Function size and responsibility
 
-- Function structure should optimize for performance and optimizer visibility first.
+- Function structure should optimise for performance and optimiser visibility first.
 - When readability and performance trade off, performance takes priority.
 - Large functions are acceptable when they represent a coherent flow and avoid needless call/forwarding overhead.
-- If logic is called from only one place, keep it inline at that call site unless extraction provides clear structural value (for example shared class-member access, reusable behavior, or isolation of unavoidable complexity).
+- If logic is called from only one place, keep it inline at that call site unless extraction provides clear structural value (for example shared class-member access, reusable behaviour, or isolation of unavoidable complexity).
 - Prefer liberal documentary comments over artificial fragmentation into mini-functions.
 
 Example:
@@ -653,9 +680,9 @@ void process() {
 Example:
 
 ```cpp
-void set_count(size_t count);                                                   // declaration
+void set_count(unsigned int count);                                             // declaration
 
-void set_count(size_t const count) {                                            // definition
+void set_count(unsigned int const count) {                                      // definition
   cached_count = count;
 }
 
@@ -688,7 +715,7 @@ void push(T&& value) {
 
 ### 13.6 `noexcept` guidance
 
-- Mark functions `noexcept` when non-throwing behavior is guaranteed and useful to consumers/optimizers.
+- Mark functions `noexcept` when non-throwing behaviour is guaranteed and useful to consumers/optimisers.
 - Do not mark `noexcept` speculatively.
 
 ### 13.7 Standard vs C library symbol usage
@@ -721,7 +748,7 @@ void write_metric(std::string const &name, int /*sample_count*/) {
 ### 14.1 `struct` vs `class` usage
 
 - Use `struct` for passive data aggregates and simple transport/state objects.
-- Use `class` when enforcing invariants/encapsulation and behavior-rich APIs.
+- Use `class` when enforcing invariants/encapsulation and behaviour-rich APIs.
 
 ### 14.2 Access section ordering
 
@@ -748,7 +775,7 @@ private:
 ### 14.4 Rule of 0/3/5 defaults
 
 - Prefer Rule of 0 where possible.
-- If custom ownership/resource behavior exists, define the appropriate special member set explicitly and consistently.
+- If custom ownership/resource behaviour exists, define the appropriate special member set explicitly and consistently.
 
 ### 14.5 Inheritance formatting
 
@@ -863,6 +890,21 @@ Example:
 - Use `DEBUG_*` naming for file/module debug toggles.
 - Keep toggles near file top for discoverability.
 
+### 17.7 Warning suppression with diagnostics pragmas
+
+- Suppress warnings narrowly with `#pragma GCC diagnostic push/pop` around the smallest possible code region.
+- Add an inline comment that explains why suppression is correct for that specific case.
+- Do not suppress warnings globally or file-wide when local suppression is possible.
+
+Example:
+
+```cpp
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wfloat-equal"
+if(lhs == rhs) return true;                                                     // byte-stable float compare is required by protocol
+#pragma GCC diagnostic pop
+```
+
 ## 18. Comments and Documentation
 
 ### 18.1 Line comments vs block comments
@@ -872,8 +914,8 @@ Example:
 
 ### 18.2 API doc comments (`///`)
 
-- Use `///` for concise API intent and behavioral notes.
-- Function bodies should typically begin with a `///` documentary comment describing intent/behavior.
+- Use `///` for concise API intent and behavioural notes.
+- Function bodies should typically begin with a `///` documentary comment describing intent/behaviour.
 - Function declarations should usually not repeat obvious intent comments; documentary comments belong primarily on definitions.
 - In classes, prefer inline comments on data members over documentary comments on member declarations.
 - Full doxygen-style comments are allowed.
@@ -999,7 +1041,7 @@ assert(buffer_size > 0 && "buffer_size must be positive in upload path");
 ### 20.4 Compile/link options layout
 
 - Keep compile/link options in named variables when reused.
-- Keep warnings and optimization flags grouped with comment headers for readability.
+- Keep warnings and optimisation flags grouped with comment headers for readability.
 
 ## 21. Bash Script Style (Brief)
 
@@ -1074,7 +1116,7 @@ namespace example {
 
 struct run_state {
   bool keep_running{true};
-  size_t retry_limit{3};
+  unsigned int retry_limit{3};
 };
 
 auto process_item(item const &source, item &target)->bool {
