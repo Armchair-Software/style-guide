@@ -16,10 +16,39 @@ This document is intentionally staged. We first lock the complete category hiera
 ## 1. Scope and Authority
 
 ### 1.1 Language scope
+
+Rule:
+
+- House style targets modern C++.
+- Baseline language expectation is C++23.
+- Adopt C++26 features proactively when toolchain and project constraints permit.
+
 ### 1.2 In-scope file types (`.cpp`, `.h`)
+
+Rule:
+
+- This guide applies to first-party C++ source and header files.
+
 ### 1.3 Out-of-scope code (third-party, vendored, generated)
+
+Rule:
+
+- Third-party and vendored code (for example `include/`) is not style-authoritative.
+- Generated files should migrate toward house style where practical, but generator output may temporarily diverge.
+
 ### 1.4 Rule priority when conflicts occur
+
+Rule:
+
+- Explicit guide rules override historical inconsistencies.
+- When examples disagree, follow the decision captured in this document.
+
 ### 1.5 Migration policy for existing inconsistent code
+
+Rule:
+
+- Style fixes are proactive: when touching files, normalize code toward this guide.
+- Historical patterns that conflict with this guide should be treated as debt to remove, not precedent.
 
 ## 2. Style Guide Method
 
@@ -49,11 +78,11 @@ This document is intentionally staged. We first lock the complete category hiera
 
 ### 5.1 Header guard strategy (`#pragma once` vs include guards)
 
-Draft rule (needs confirmation):
+Rule:
 
-- Prefer `#pragma once` for new first-party headers.
-- Do not require dual guard style (`#pragma once` + `#ifndef`) in new code.
-- Legacy headers with include guards can remain until touched.
+- Use `#pragma once` for all first-party headers.
+- Convert legacy include guards to `#pragma once` proactively when files are touched.
+- Do not use dual guard style (`#pragma once` + `#ifndef`) in new or cleaned-up headers.
 
 Evidence:
 
@@ -62,12 +91,17 @@ Evidence:
 
 ### 5.2 Include block ordering
 
-Draft rule:
+Rule:
 
 - In `.cpp` files, include the matching local header first when one exists.
-- Then include standard library headers.
-- Then third-party headers.
-- Then project headers from other modules.
+- Then apply this include group order:
+  - standard language/library headers
+  - operating system headers
+  - Boost headers
+  - other third-party headers (roughly descending significance/notability)
+  - internal shared libraries/components (for example `whateverstorm` and similar)
+  - internal project general utilities
+  - specific functional/class includes
 
 Evidence:
 
@@ -76,10 +110,12 @@ Evidence:
 
 ### 5.3 Grouping: standard, third-party, project-local
 
-Draft rule:
+Rule:
 
 - Keep include groups visually separated by one blank line.
 - Avoid interleaving groups unless required by platform/compiler constraints.
+- Prefer alphabetical sorting within each include group.
+- Sorting is primarily tooling-enforced, not manual-review-enforced.
 
 ### 5.4 Blank lines between include groups
 
@@ -126,10 +162,11 @@ Evidence:
 
 ### 6.2 Tabs vs spaces
 
-Draft rule:
+Rule:
 
 - Use spaces for indentation in first-party C++.
 - Tabs are not idiomatic for first-party `.cpp/.h` files.
+- Editor configuration should convert tabs to spaces automatically.
 
 Evidence:
 
@@ -138,10 +175,11 @@ Evidence:
 
 ### 6.3 Trailing whitespace policy
 
-Draft rule:
+Rule:
 
 - No trailing whitespace in first-party hand-authored code.
 - Generated files may preserve generator output until generation is standardized.
+- Editor configuration should strip trailing whitespace and end-of-file whitespace automatically.
 
 Evidence:
 
@@ -160,10 +198,10 @@ Evidence:
 
 ### 6.5 Horizontal alignment policy
 
-Draft rule (provisional):
+Rule:
 
 - Alignment is allowed for local readability when grouping related declarations.
-- Do not require alignment globally; use it sparingly to avoid high diff churn.
+- Alignment is encouraged when it clearly improves readability.
 
 Observed patterns:
 
@@ -176,14 +214,15 @@ Observed patterns:
 
 ### 6.6 Line length policy and exceptions
 
-Draft rule (needs confirmation):
+Rule:
 
-- Adopt a soft line-length target rather than a hard cutoff.
-- Prefer wrapping new code around ~120 columns.
+- There is no hard line-length limit.
+- Prioritize readability over numeric width targets.
+- Avoid aggressively splitting readable long lines just to satisfy an arbitrary length.
 - Allow longer lines for:
   - URLs and machine-oriented strings,
   - generated/string-table content,
-  - dense explanatory comments where wrapping harms readability.
+  - dense expressions or comments where wrapping harms readability.
 
 Evidence:
 
@@ -192,7 +231,7 @@ Evidence:
 
 ### 6.7 Long statement wrapping and continuation indentation
 
-Draft rule:
+Rule:
 
 - Prefer operator-leading or operator-trailing wrapped chains with consistent continuation indentation.
 - For stream chains and builder-like code, keep one operator per line after wrap.
@@ -209,6 +248,15 @@ logger << "DEBUG: on_close, event_type " << event_type
 ```
 
 (from `anchorhold/main.cpp`)
+
+### 6.8 Editor behavior and defaults
+
+Rule:
+
+- Configure editors to:
+  - use 2-space tab width
+  - insert spaces instead of tab characters
+  - strip trailing whitespace and EOF whitespace on save
 
 ## 7. Braces and Block Formatting
 
@@ -244,7 +292,24 @@ Evidence:
 Draft rule:
 
 - Use attached braces for `for(...)`, `while(...)`, and `switch(...)`.
-- Keep `case` blocks indented one level from `switch`.
+- Keep `case` labels at the same indentation level as `switch`.
+- Indent statements inside each `case` by one level.
+- Add braces inside a `case` only when needed to control scope (for example local variable lifetime).
+
+Example:
+
+```cpp
+switch(mode) {
+case mode_type::a:
+  {
+    int value{1};
+  }
+  break;
+case mode_type::b:
+  execute();
+  break;
+}
+```
 
 ### 7.4 Namespace brace style and closing comments
 
@@ -276,7 +341,25 @@ Draft rule:
 
 - Single-line guard clauses are acceptable for simple exits:
   - `if(!ready) return;`
+- Single-line bodies are also acceptable for simple assignment/function-call bodies when readability stays high.
 - Use braces once a branch has multiple statements.
+
+### 7.7 What does not get indented
+
+Rule:
+
+- Do not indent:
+  - `public:`, `private:`, `protected:` labels
+  - `case` labels under `switch`
+  - primary content inside `namespace` scopes
+
+### 7.8 Conditional indentation in special blocks
+
+Rule:
+
+- Indentation may still be used inside preprocessor-controlled blocks and diagnostic blocks when it improves readability:
+  - code inside `#ifdef` regions is often indented
+  - code inside `#pragma GCC diagnostic push` regions may be indented when helpful
 
 ## 8. Spacing Rules
 
@@ -339,6 +422,16 @@ Draft rule:
 - Prefer named casts with regular call spacing:
   - `static_cast<T>(value)`
 
+### 8.8 Multi-line comma-separated list formatting
+
+Rule:
+
+- For function parameter lists and similar call-like constructs, continuation alignment under the opening `(` is acceptable and common.
+- For most other brace-based lists (especially aggregate/initializer content), prefer:
+  - opening brace on the introducing line
+  - one element per subsequent line
+  - one indentation level for each element
+
 ## 9. Naming and Case Conventions
 
 ### 9.1 Namespace names
@@ -367,6 +460,8 @@ Draft rule:
 
 - Use lowercase snake_case for local variables and non-member state.
 - Allow short loop counters (`i`, `x`, `y`, `z`) in narrow scopes.
+- Otherwise, variable names must be meaningful and legible.
+- Avoid terse acronyms and short opaque names except where representing true mathematical symbols.
 
 ### 9.5 Member names
 
@@ -400,6 +495,15 @@ Draft rule:
 
 - Use short UpperCamel or single-letter template parameter names (`T`, `FromT`, `Tcpp`, `Tc`).
 
+### 9.10 Namespace usage rules
+
+Rule:
+
+- Never use `using namespace ...` for non-literal namespaces.
+- `using namespace std::chrono_literals;` and similar literal namespaces are allowed in source files when they improve readability.
+- Do not place `using namespace ...literals` in headers, to avoid namespace pollution for includers.
+- Namespace aliases are permitted only when they clearly improve legibility and do not introduce ambiguity.
+
 ## 10. Declarations and Definitions
 
 ### 10.1 `auto` usage policy
@@ -413,8 +517,9 @@ Draft rule:
 
 Draft rule:
 
-- Trailing return style is allowed and common in entrypoints/callback-heavy code.
-- Prefer one style consistently within a file/module once chosen.
+- Trailing return style is allowed.
+- It is encouraged for entry points and callback-heavy signatures.
+- Do not use trailing return style when it makes a declaration more verbose than a direct return type.
 
 ### 10.3 Reference and const placement style
 
@@ -426,10 +531,17 @@ Draft rule:
 
 ### 10.4 Declaration ordering inside classes
 
-Draft rule:
+Rule:
 
 - Keep access sections explicit (`public`, `private`, `protected`).
-- Group fields and methods logically (state, construction, API surface, helpers).
+- Preferred class member order:
+  - external references set at initialization (injected dependencies, handles)
+  - nested class/struct/enum definitions (except those tightly associated with a specific member)
+  - member objects and variables
+  - constructors and destructor
+  - other member functions
+  - friend declarations
+- Preserve pragmatism for data layout/packing when ordering member objects.
 
 ### 10.5 Initializer list formatting
 
@@ -449,6 +561,24 @@ Draft rule:
 
 - Prefer `using` over `typedef`.
 - Use alias names that preserve existing lowercase snake_case conventions.
+
+### 10.8 `static`/type/`constexpr`/`const` ordering
+
+Rule:
+
+- Prefer declaration ordering:
+  - `static` first (if present)
+  - type
+  - `constexpr` or `const`
+  - pointer/reference marker
+  - variable name
+
+Example:
+
+```cpp
+static std::chrono::seconds constexpr update_interval{5s};
+std::string const &name_ref{source.name};
+```
 
 ## 11. Initialization and Expressions
 
@@ -479,7 +609,7 @@ Rule:
 
 Rule:
 
-- Use designated initializers for aggregate setup when field clarity matters.
+- Use designated initializers wherever possible for aggregate setup.
 - Keep one designated field per line for multi-field initialization.
 
 Example:
@@ -500,10 +630,16 @@ Draft rule:
 
 ### 11.5 Cast policy (`static_cast`, C-style cast restrictions)
 
-Draft rule:
+Rule:
 
 - Prefer named casts (`static_cast`, `reinterpret_cast`, etc.).
-- Avoid C-style casts in new code except for tightly constrained low-level compatibility cases.
+- C-style casts must be proactively removed from first-party C++.
+- When encountered, convert to the appropriate named cast.
+
+Current migration targets identified during scan:
+
+- `vectorstorm/matrix/matrix3.h` and `vectorstorm/matrix/matrix4.h` (`(T)` casts in assignment operators, mirrored across projects)
+- `memorystorm/memorystorm.cpp` (`(UINT_PTR)` casts, mirrored across projects)
 
 ### 11.6 Ternary operator formatting
 
@@ -514,10 +650,26 @@ Draft rule:
 
 ### 11.7 Boolean expression clarity
 
-Draft rule:
+Rule:
 
 - Prefer explicit boolean conditions and guard clauses.
-- Avoid deeply negated or chained boolean expressions without intermediate naming.
+- Avoid deeply negated or dense chained expressions without intermediate naming.
+
+Example (prefer):
+
+```cpp
+bool const timed_out{now >= deadline};
+bool const has_capacity{queue_size < max_queue_size};
+if(timed_out || !has_capacity) return false;
+```
+
+Example (avoid):
+
+```cpp
+if(!(now < deadline && (queue_size < max_queue_size || allow_overflow))) {
+  return false;
+}
+```
 
 ## 12. Control Flow Style
 
@@ -527,12 +679,14 @@ Draft rule:
 
 - Prefer early exits (`return`, `continue`) to reduce nested indentation.
 - Use guard clauses for invalid/empty/error states.
+- Keep scopes as small as practical; create inner scopes in long functions to limit object lifetimes.
 
 ### 12.2 Condition complexity thresholds
 
 Draft rule:
 
 - Keep complex conditions readable; extract named booleans when expressions become dense.
+- Prefer `if` init-statements when a temporary is only needed for the condition/body.
 
 ### 12.3 `switch` style and exhaustiveness handling
 
@@ -549,13 +703,15 @@ Draft rule:
 - Prefer range-for when iterating container elements directly.
 - Use indexed `for` where indices are semantically meaningful.
 - Use `while` for open-ended loops tied to runtime state flags.
+- Prefer modern ranges/views/zip-style iteration helpers over manual iterator increment code when viable.
 
 ### 12.5 `continue`/`break` usage
 
-Draft rule:
+Rule:
 
-- Use `continue` for quick skip paths in loops.
-- Use `break` for explicit termination when loop condition alone is not clear.
+- For unsigned index iteration, prefer `!= end` termination when iterating over known bounds.
+- Use `continue` for explicit fast-path skips when it simplifies loop structure.
+- Use `break` when explicit early termination improves clarity over condition mutation.
 
 ## 13. Functions and APIs
 
@@ -578,16 +734,77 @@ Draft rule:
 ## 15. Templates and Generic Code
 
 ### 15.1 Template declaration formatting
+
+Rule:
+
+- Use compact template declaration formatting:
+  - `template<typename T>`
+- Keep template parameter lists readable; wrap only when needed.
+
 ### 15.2 Constraints/concepts style
+
+Rule:
+
+- Prefer modern constraints/concepts when they improve correctness and readability.
+- Avoid verbose SFINAE patterns when a modern alternative is available.
+
 ### 15.3 Specialization formatting
+
+Rule:
+
+- Keep specializations visually close to primary templates where practical.
+- Preserve the same naming and formatting style as primary template definitions.
+
 ### 15.4 Generic naming conventions
+
+Rule:
+
+- Use conventional short template parameter naming (`T`, `FromT`, `Tcpp`, etc.) unless a semantic name improves clarity.
+
+### 15.5 Modern C++ feature preference
+
+Rule:
+
+- Prefer the most modern C++ feature set available to the target toolchain (C++23 baseline, C++26 adoption when viable).
+- Prefer modern constructs over legacy equivalents when readability and maintainability improve.
 
 ## 16. Lambdas and Callables
 
 ### 16.1 Capture style
+
+Rule:
+
+- Capture only what is needed.
+- Prefer explicit captures over broad `[=]`/`[&]` in complex contexts.
+
 ### 16.2 Parameter and return formatting
+
+Rule:
+
+- Follow normal function formatting for lambda parameters and return type annotations.
+- Omit empty `()` for parameterless lambdas (modern C++ style).
+
+Example:
+
+```cpp
+auto tick{[] {
+  return true;
+}};
+```
+
 ### 16.3 Multi-line lambda formatting
+
+Rule:
+
+- Use attached braces and normal block indentation.
+- For lambdas passed inline, wrap arguments cleanly and keep the lambda body readable.
+
 ### 16.4 Callback conventions
+
+Rule:
+
+- Use trailing return types on callbacks when clarity improves (especially in complex signatures).
+- Keep callback side effects explicit and small where possible.
 
 ## 17. Attributes, Macros, and Preprocessor
 
@@ -602,8 +819,9 @@ Draft rule:
 
 Draft rule:
 
-- Compiler-specific attributes are allowed when they deliver measurable value.
-- Keep usage explicit and localized; prefer standard attributes first.
+- Compiler attributes are encouraged when likely to be useful.
+- Prefer GNU-compatible attributes because target toolchains are GCC and Clang.
+- Use non-GNU attribute forms only when strictly necessary for the task.
 
 ### 17.3 `#define` naming and scope
 
@@ -650,10 +868,43 @@ Draft rule:
 ## 18. Comments and Documentation
 
 ### 18.1 Line comments vs block comments
+
+Rule:
+
+- Prefer `//` comments over block comments for most code documentation.
+- Use block comments sparingly (large doc blocks or temporarily disabled regions during active refactor).
+
 ### 18.2 API doc comments (`///`)
+
+Rule:
+
+- Use `///` for concise API intent and behavioral notes in headers and key implementation points.
+
 ### 18.3 Inline rationale comments
+
+Rule:
+
+- Prefer same-line comments where appropriate.
+- Align inline comments to start at column 80 when practical.
+- If code already extends beyond column 80, place comment after one space rather than forcing a wrap.
+- Use shared tooling for alignment when possible:
+  - `/home/slowriot/code/scripts/comment_aligner.sh`
+  - `/home/slowriot/code/scripts/comment_aligner_project.sh`
+  - `/home/slowriot/code/scripts/comment_aligner_cmake.sh`
+
 ### 18.4 TODO/FIXME/HACK conventions
+
+Rule:
+
+- Keep TODO-style comments specific and actionable.
+- Prefer brief reason + intent over vague placeholders.
+
 ### 18.5 Commented-out code policy
+
+Rule:
+
+- Avoid retaining commented-out code long-term.
+- If temporarily kept during active change, annotate intent and remove promptly.
 
 ## 19. Error Handling and Diagnostics
 
@@ -746,9 +997,39 @@ Draft rule:
 ## 23. Tooling and Enforcement
 
 ### 23.1 `clang-format` policy
+
+Rule:
+
+- Maintain a project `clang-format` configuration aligned with this guide.
+- Use tooling for mechanical consistency (especially include sorting and routine wrapping), while preserving readability-first exceptions.
+
 ### 23.2 `clang-tidy` policy
+
+Rule:
+
+- Use `clang-tidy` checks to enforce modernization and safety where practical.
+- Treat C-style cast detection and modernization checks as proactive cleanup targets.
+
 ### 23.3 CI validation hooks
+
+Rule:
+
+- Prefer automated checks for style-invariant rules (include order, whitespace, forbidden constructs).
+
 ### 23.4 Review checklist
+
+Rule:
+
+- Human review should focus on readability and intent, not mechanical formatting already handled by tooling.
+
+### 23.5 Editor configuration baseline
+
+Rule:
+
+- Editors should be configured to:
+  - use 2-space indentation
+  - convert tabs to spaces
+  - trim trailing and EOF whitespace on save
 
 ## 24. Provisional Baseline (from current audit; pending confirmation)
 
@@ -782,10 +1063,12 @@ Notes:
 - Uses reference style `type const &name`.
 - Uses brace initialization and designated initializers.
 
-## 25. Open Questions from Initial Scan
+## 25. Resolved Decisions (2026-03-03 Review)
 
-1. Should control keywords be standardized as `if(` / `for(` / `catch(` (dominant) or `if (` / `for (` / `catch (`?
-2. Should new headers always use `#pragma once`, or are include guards still acceptable in first-party code?
-3. Should include order be standardized (for example: same-directory header, standard library, third-party, project headers)?
-4. Should there be a hard line-length limit (for example 100/120), or only a soft limit with explicit exceptions?
-5. Should vertical alignment for declarations/assignments/comments be allowed, disallowed, or limited to short local blocks?
+1. Control keywords use attached parentheses: `if(`, `for(`, `catch(`.
+2. Headers use `#pragma once`; legacy include guards should be proactively migrated.
+3. Include order is standardized with explicit group tiers from local header to specific project includes.
+4. No hard line-length limit; readability first, and avoid forced wrapping.
+5. Vertical alignment is encouraged when it improves clarity.
+6. `switch`/`case` formatting uses case labels aligned with `switch`, with case body statements indented.
+7. Inline comments are preferred where appropriate and aligned to column 80 when practical.
