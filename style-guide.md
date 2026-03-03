@@ -1,8 +1,6 @@
 # Armchair Software Style Guide
 
-Status: Working draft
-
-Purpose: capture Armchair Software house style for first-party C++.
+Purpose: formalise Armchair Software C++ programming style and guide contributors working on Armchair projects.
 
 ## 1. Scope and Authority
 
@@ -49,7 +47,7 @@ Purpose: capture Armchair Software house style for first-party C++.
 
 - Keep source grouped by subsystem/domain (`render`, `gui`, `world`, `net`, etc.).
 - Keep shared internal libraries in clearly named module directories (`vectorstorm`, `logstorm`, `timestorm`, etc.).
-- `*storm` libraries synchronised through `libvoxelstorm` must not be renamed or structurally reorganized locally.
+- `*storm` libraries synchronised through `libvoxelstorm` must not be renamed or structurally reorganised locally.
 - Improvements to synchronised libraries are encouraged, but should avoid breaking changes and remain suitable for upstream redistribution.
 - Local edits in synchronised libraries are expected to be reviewed for upstream inclusion in `libvoxelstorm`.
 
@@ -70,7 +68,7 @@ Purpose: capture Armchair Software house style for first-party C++.
 
 ### 3.5 Public vs private headers
 
-- Headers intended for broad reuse should expose stable API surface and minimize transitive includes.
+- Headers intended for broad reuse should expose stable API surface and minimise transitive includes.
 - Private implementation details should remain in `.cpp` files or tightly scoped internal headers.
 
 ### 3.6 Test/source placement conventions
@@ -176,7 +174,7 @@ world_manager.h
 ### 6.3 Trailing whitespace policy
 
 - No trailing whitespace in first-party hand-authored code.
-- Generated files may preserve generator output until generation is standardized.
+- Generated files may preserve generator output until generation is standardised.
 - Editor configuration should strip trailing whitespace and end-of-file whitespace automatically.
 
 ### 6.4 Consecutive blank line policy
@@ -192,7 +190,7 @@ world_manager.h
 ### 6.6 Line length policy and exceptions
 
 - There is no hard line-length limit.
-- Prioritize readability over numeric width targets.
+- Prioritise readability over numeric width targets.
 - Avoid aggressively splitting readable long lines just to satisfy an arbitrary length.
 - Allow longer lines for:
   - URLs and machine-oriented strings,
@@ -241,6 +239,16 @@ public:
 
 - Opening brace stays on the same line as the condition.
 - Place `else` as `} else {`.
+
+Example:
+
+```cpp
+if(ready) {
+  run_once();
+} else {
+  rebuild_state();
+}
+```
 
 ### 7.3 Loop/switch brace style
 
@@ -295,9 +303,9 @@ auto predicate{[&](int value) {
 Example:
 
 ```cpp
-if(ready) run_once();                                                           // allowed
+if(ready) run_once();                    // allowed
 
-if(ready) {                                                                     // required when body is on next line
+if(ready) {                              // required when body is on next line
   run_once();
 }
 ```
@@ -327,6 +335,17 @@ if(ready) {                                                                     
 - No space between function name and `(` in declarations and definitions.
 - Trailing return type examples use `auto f()->T` without spaces around `->`.
 
+Example:
+
+```cpp
+auto build_cache(config const &cfg)->cache;
+void set_enabled(bool enabled);
+
+void set_enabled(bool enabled) {
+  enabled_state = enabled;
+}
+```
+
 ### 8.3 Operator spacing (arithmetic, assignment, comparison, logical)
 
 - Use spaces around binary operators.
@@ -336,6 +355,22 @@ if(ready) {                                                                     
 
 - One space after commas.
 - No space before commas or semicolons.
+- No space before `:` in labels (for example `case ready:`).
+- Use one space on both sides of `:` in range-for clauses.
+
+Example:
+
+```cpp
+for(auto const &[name, value] : my_map) {
+  switch(value.state) {
+  case state::ready:
+    consume(name, value);
+    break;
+  case state::skipped:
+    continue;
+  }
+}
+```
 
 ### 8.5 Pointer/reference spacing
 
@@ -699,7 +734,7 @@ void process() {
   /// Validate input and fast-fail
   if(!ready) return;
 
-  {                                                                              // setup phase
+  {                                      // setup phase
     setup_context const ctx{build_context()};
     state.setup(ctx);
   }
@@ -725,9 +760,9 @@ void process() {
 Example:
 
 ```cpp
-void set_count(unsigned int count);                                             // declaration
+void set_count(unsigned int count);       // declaration
 
-void set_count(unsigned int const count) {                                      // definition
+void set_count(unsigned int const count) { // definition
   cached_count = count;
 }
 
@@ -946,7 +981,7 @@ Example:
 ```cpp
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wfloat-equal"
-if(lhs == rhs) return true;                                                     // byte-stable float compare is required by protocol
+if(lhs == rhs) return true;              // byte-stable float compare is required by protocol
 #pragma GCC diagnostic pop
 ```
 
@@ -994,6 +1029,7 @@ auto parse_args(int argc, char const *argv[])->bool {
 - In function bodies and inline code comments, start comments lowercase unless grammar/acronyms require otherwise.
 - For one-line comments, avoid trailing punctuation to reduce visual noise.
 - `///` documentary comments should start with capitalized text.
+- Markdown examples in this document may use compact inline-comment spacing for viewport readability.
 - Use shared `scripts` repo comment-alignment tools when possible:
   - `comment_aligner.sh`
   - `comment_aligner_project.sh`
@@ -1002,7 +1038,7 @@ auto parse_args(int argc, char const *argv[])->bool {
 Example:
 
 ```cpp
-{                                                                              // temporary loading scope
+{                                        // temporary loading scope
   loader_context const ctx{build_loader_context()};
   run_loader(ctx);
 }
@@ -1066,11 +1102,11 @@ assert(buffer_size > 0 && "buffer_size must be positive in upload path");
 
 - Use 2-space indentation inside command argument blocks.
 - Keep long lists (`set(...)`, `add_executable(...)`, warning flags) one item per line.
-- Use uppercase command names consistently.
+- Use lowercase CMake command names consistently.
 
 ### 20.2 Condition and build-type block style
 
-- Normalize build type with `string(TOLOWER ...)` and branch on explicit values.
+- Normalise build type with `string(TOLOWER ...)` and branch on explicit values.
 - Keep one responsibility per conditional block (build mode, exception mode, feature toggles).
 - Emit clear `message(STATUS ...)` lines for selected mode.
 
@@ -1082,6 +1118,22 @@ assert(buffer_size > 0 && "buffer_size must be positive in upload path");
   - third-party
 - Keep `target_link_libraries`, `target_compile_options`, and `target_link_options` in separate clear blocks.
 - Do not use source globbing for build targets; list files explicitly.
+- In multi-line `target_link_libraries(...)`, keep visibility and library on the same line (`PRIVATE libname`).
+
+Example:
+
+```cmake
+add_executable(example_tool
+  main.cpp
+  app.cpp
+  app.h
+)
+
+target_link_libraries(example_tool
+  PRIVATE vectorstorm
+  PRIVATE logstorm
+)
+```
 
 ### 20.4 Compile/link options layout
 
