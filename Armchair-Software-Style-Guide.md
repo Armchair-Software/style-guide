@@ -580,6 +580,17 @@ result = item{
 
 - Use explicit suffixes where type clarity matters (`1.0f`, `5s`).
 - Use digit separators for large literals when it improves readability (`100'000'000.0f`).
+- For bitmasks and protocol/register bit patterns, prefer binary literals with separators for legibility.
+- Group binary digits on meaningful boundaries (field/byte); if no natural boundary exists, group in nibbles.
+- Use unsigned suffixes on integer bitmask literals to avoid unintended signed behaviour (`0b...u`, `0x...u`).
+
+Example:
+
+```cpp
+auto constexpr packet_mask{0b1000'0000'1010'0101u};
+auto constexpr flags_mask{0b0011'1100u};
+auto constexpr high_nibble{0b1111'0000u};
+```
 
 ### 11.5 Cast policy (`static_cast`, C-style cast restrictions)
 
