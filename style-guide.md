@@ -1210,6 +1210,7 @@ target_link_libraries(example_tool
 - Use `#!/bin/bash`.
 - Prefer explicit failure checks (`|| exit 1`) for critical commands.
 - For user-facing build scripts, preserve existing explicit flow over implicit shell options.
+- Avoid `set -euo pipefail`; prefer explicit error handling and clear control flow.
 
 ### 21.2 Variable naming and quoting
 
@@ -1290,3 +1291,9 @@ target_link_libraries(example_tool
 - How to use:
   - copy `.gitattributes` to the project root
   - keep project-specific exceptions in the same file only when required by that project's asset/toolchain needs
+
+### 23.4 C++ autoformatters
+
+- No general-purpose C++ autoformatter is currently adopted as an enforcement tool for this style guide.
+- Reason: tool behavior (notably whitespace normalization and preprocessor-block handling) conflicts with required Armchair layout conventions, including intentional manual alignment.
+- Use targeted automation scripts for specific checks instead (for example include ordering, `#pragma once`, banned constructs), with human review enforcing remaining style rules.
