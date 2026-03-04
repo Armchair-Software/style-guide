@@ -166,6 +166,7 @@ world_manager.h
 ### 5.2 Include block ordering
 
 - In `.cpp` files, include the matching local header first when one exists.
+- In unit test translation units, include the test framework header(s) first (for example Catch2, Boost.Test), above other include groups.
 - Then apply this include group order:
   - standard language/library headers
   - operating system headers
@@ -1093,8 +1094,10 @@ Example:
 
 ### 18.5 Commented-out code policy
 
-- Avoid retaining commented-out code long-term.
-- If temporarily kept during active change, annotate intent and remove promptly.
+- Do not remove existing comments unless they add no value.
+- Commented code may be kept intentionally when it conveys useful context (for example illustrative alternatives, defaulted options that may be toggled later, or documented integration variants).
+- If commented code is intentionally retained, keep it accurate and legible, and prefer a brief nearby note when intent is not obvious.
+- Remove stale commented code only when it is clearly obsolete or misleading.
 
 ## 19. Error Handling and Diagnostics
 
