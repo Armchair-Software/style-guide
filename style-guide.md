@@ -231,6 +231,7 @@ world_manager.h
 - There is no hard line-length limit.
 - Prioritise readability over numeric width targets.
 - Avoid aggressively splitting readable long lines just to satisfy an arbitrary length.
+- Comments do not have a hard wrapping requirement; keep them on one line when they remain legible in a typical modern editor viewport (around 200 visible columns).
 - Allow longer lines for:
   - URLs and machine-oriented strings,
   - generated/string-table content,
@@ -1060,6 +1061,7 @@ auto parse_args(int argc, char const *argv[])->bool {
 ### 18.3 Inline rationale comments
 
 - Prefer same-line comments where appropriate.
+- Avoid splitting comments across multiple lines unless the split improves clarity.
 - Align inline comments to start at column 80 exactly.
 - If code already extends beyond column 80, place comment one space after existing code rather than forcing a wrap.
 - When documenting scope intent, place the comment on the opening brace line, not the closing brace line.
