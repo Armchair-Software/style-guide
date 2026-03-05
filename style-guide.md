@@ -863,6 +863,39 @@ void write_metric(std::string const &name, int /*sample_count*/) {
 }
 ```
 
+### 13.9 Function grouping and spacing
+
+- Keep function declarations grouped by purpose or other sensible arrangement.
+- In implementation files, keep related function definitions adjacent with no blank separator when they are part of the same tight group (for example overload sets, closely related getters/setters, or small helper clusters for one feature).
+- Otherwise, separate function definitions with one blank line.
+- Do not write function definitions in single-line inline-body form; place function bodies on following lines.
+
+Example:
+
+```cpp
+auto get_width() const->unsigned int {
+  return width;
+}
+auto get_height() const->unsigned int {
+  return height;
+}
+void set_width(unsigned int const value) {
+  width = value;
+}
+void set_height(unsigned int const value) {
+  height = value;
+}
+
+void rebuild_layout() {
+  // separate function group
+}
+```
+
+### 13.10 Declaration/definition ordering
+
+- In implementation files, keep function definitions in the same order as declarations in the corresponding header.
+- Reordering is allowed only when there is a technical reason (for example conditional compilation constraints, explicit template instantiation ordering, or unavoidable dependency constraints).
+
 ## 14. Classes, Structs, and OOP
 
 ### 14.1 `struct` vs `class` usage
@@ -900,7 +933,7 @@ private:
 ### 14.5 Inheritance formatting
 
 - Keep inheritance declarations compact and readable:
-  - `class child : public base { ... };`
+  - `class child : public base {};`
 - Prefer composition over inheritance when inheritance does not clearly model an is-a relationship.
 
 ### 14.6 Virtual and override conventions
@@ -947,7 +980,7 @@ private:
 
 - Follow normal function formatting for lambda parameters and return type annotations.
 - Omit empty `()` for parameterless lambdas (modern C++ style).
-- Do not place a space before a lambda body opening brace (`[]{`, `[](int v){ ... }`).
+- Do not place a space before a lambda body opening brace (`[]{`, `[](int v){}`).
 
 Example:
 
