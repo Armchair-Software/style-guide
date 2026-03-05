@@ -337,6 +337,7 @@ auto predicate{[&](int value) {
 - Single-line guard clauses are acceptable for simple exits:
   - `if(!ready) return;`
 - Single-line bodies are also acceptable for simple assignment/function-call bodies when readability stays high.
+- This allowance applies to control statements only, not function definitions (see §13.9).
 - Use braces once a branch has multiple statements.
 - If the body appears on a new line, braces are mandatory (no newline-separated unbraced bodies).
 
