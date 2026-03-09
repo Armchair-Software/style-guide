@@ -1184,6 +1184,15 @@ try {
 
 - Log failures with actionable context (operation, key identifiers, error text).
 - Prefer consistent severity prefixes (`ERROR`, `WARNING`, `DEBUG`) matching project conventions.
+- For console and file stream output, prefer `std::endl` over `'\n'`/`"\n"` by default.
+- Use `'\n'`/`"\n"` only when there is a specific reason (for example avoiding flush behaviour or optimising high-volume output paths).
+
+Example:
+
+```cpp
+logger << "ERROR: upload failed for chunk " << chunk_id << std::endl;
+bulk_log << line << '\n'; // allowed when non-flushing output is intentional
+```
 
 ### 19.3 Assertions and defensive checks
 
