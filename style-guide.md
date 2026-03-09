@@ -1168,14 +1168,26 @@ Example:
 - Catch formatting uses attached control parentheses (`catch(...)`).
 - Catch by `const &` for exception types unless mutation is required.
 - Keep catch handlers focused: log context, clean up, and return/propagate.
+- When exception handling applies to the whole function body, prefer function-level try/catch syntax over wrapping the entire body in an inner `try` block.
 
 Example:
 
 ```cpp
-try {
+auto run_job_inner_try()->bool {          // avoid
+  try {
+    run();
+    return true;
+  } catch(std::exception const &e) {
+    logger << "ERROR: run failed: " << e.what() << std::endl;
+    return false;
+  }
+}
+
+auto run_job()->bool try {                // preferred
   run();
+  return true;
 } catch(std::exception const &e) {
-  logger << "ERROR: run failed: " << e.what();
+  logger << "ERROR: run failed: " << e.what() << std::endl;
   return false;
 }
 ```
