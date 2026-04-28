@@ -913,13 +913,18 @@ double const magnitude{std::abs(delta)};
 
 ### 13.8 Unused names (parameters and structured bindings)
 
-- Keep unused parameter names present but commented inline in definitions:
-  - `do_something(int /*value*/)`
+- In declarations, keep the ordinary parameter name:
+  - `void do_something(int value);`
+- In definitions, keep unused parameter names present but commented inline:
+  - `void do_something(int /*value*/)`
+- Do not suppress unused function parameters with `(void)value` inside the function body.
 - For unused structured-binding elements, bind the unused part as `_` instead of using `(void)name` casts after binding.
 
 Example:
 
 ```cpp
+void write_metric(std::string const &name, int sample_count);
+
 void write_metric(std::string const &name, int /*sample_count*/) {
   metrics.emplace_back(name);
 }
