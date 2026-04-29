@@ -681,7 +681,7 @@ constexpr auto has_flag(render_flags value, render_flags flag)->bool {
 
 ### 11.1 Uniform initialization (house preference: universal braces)
 
-- Use brace initialization as the default when a declaration is intentionally initialized.
+- Use brace initialization as the default when a declaration is intentionally initialized, as opposed to `=` initialisation.
 - This applies to scalars, class types, aggregates, containers, and temporaries where practical.
 - Do not add empty braces when they are semantically redundant.
 - If omission would leave a value uninitialized and a specific default value is intended, prefer spelling that value explicitly inside the braces rather than relying on empty braces.
@@ -1075,7 +1075,7 @@ private:
 - Follow normal function formatting for lambda parameters and return type annotations.
 - Omit empty `()` for parameterless lambdas (modern C++ style).
 - Do not place a space before a lambda body opening brace (`[]{`, `[](int v){}`).
-- If a lambda has no trailing return type, keep the closing `)` attached directly to the opening brace:
+- If a lambda has no trailing return type, keep the closing `]` or `)` (if used) attached directly to the opening brace:
   - `[](int value){`
 - If a lambda has a trailing return type, keep `)->type` compact with no spaces around `->`, and keep the single ordinary body-opening space before `{`:
   - `[](size_t count)->float {`
