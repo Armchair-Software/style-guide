@@ -681,16 +681,33 @@ constexpr auto has_flag(render_flags value, render_flags flag)->bool {
 
 ### 11.1 Uniform initialization (house preference: universal braces)
 
-- Use brace initialization as the default for all declarations.
+- Use brace initialization as the default when a declaration is intentionally initialized.
 - This applies to scalars, class types, aggregates, containers, and temporaries where practical.
+- Do not add empty braces when they are semantically redundant.
+- If omission would leave a value uninitialized and a specific default value is intended, prefer spelling that value explicitly inside the braces rather than relying on empty braces.
 - Existing declaration-site `=` initialization in legacy files is non-idiomatic and should be migrated when touched.
 
 Example:
 
 ```cpp
-int constexpr retries{3};
+int count{0};
+std::vector<uint8_t> bytes;
 std::string const name{"sample"};
 auto constexpr timeout{5s};
+```
+
+Avoid:
+
+```cpp
+int count{};
+std::vector<uint8_t> bytes{};
+```
+
+Prefer:
+
+```cpp
+int count{0};
+std::vector<uint8_t> bytes;
 ```
 
 ### 11.2 Assignment vs initialization distinctions
