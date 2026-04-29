@@ -902,12 +902,15 @@ void push(T&& value) {
 ### 13.7 Standard vs C library symbol usage
 
 - Prefer C++ standard-library function symbols with `std::` qualification (for example `std::abs` rather than `abs`).
-- Do not force `std::` qualification for type names where house style prefers unqualified forms (for example use `size_t`, not `std::size_t`).
+- Do not force `std::` qualification for type names where house style prefers unqualified forms.
+- Prefer `size_t`, `uint8_t`, `uint16_t`, `uint32_t`, `uint64_t`, and related fixed-width aliases without `std::` qualification.
+- Write `size_t`, not `std::size_t`, and `uint8_t`, not `std::uint8_t`.
 
 Example:
 
 ```cpp
 size_t const count{values.size()};
+uint8_t const flags{0b1010'0001};
 double const magnitude{std::abs(delta)};
 ```
 
